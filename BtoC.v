@@ -1,0 +1,1 @@
+// em aberto para entender a entrada do multiplexador
