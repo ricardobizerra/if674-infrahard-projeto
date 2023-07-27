@@ -2,7 +2,7 @@ module DivSrcB(
     input [31:0] B,
     input [31:0] divisorOut,
     input sel,
-    output reg out[31:0]
+    output reg [31:0] out
 );
 
 always @* begin

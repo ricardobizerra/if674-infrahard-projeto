@@ -5,7 +5,7 @@ module PcSource (
     input [31:0] MemSignExtend,
     input [31:0] EPCOut,
     input [2:0] sel,
-    output reg out[31:0]
+    output reg [31:0] out
 );
 
 always @* begin

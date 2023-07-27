@@ -4,7 +4,7 @@ module RegDst (
     input [4:0] reg29,
     input [4:0] reg31,
     input [1:0] sel,
-    output reg out[4:0]
+    output reg [4:0] 
 );
 
 always @* begin

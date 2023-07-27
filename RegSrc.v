@@ -1,8 +1,8 @@
 module RegSrc (
     input [31:0]in,
     input sel,
-    output reg in_divisor[31:0],
-    output reg in_dividendo[31:0]
+    output reg [31:0] in_divisor,
+    output reg [31:0] in_dividendo
 );
 
 always @* begin

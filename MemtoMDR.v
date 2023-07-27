@@ -3,7 +3,7 @@ module MemtoMDR(
     input [31:0] Mem16,
     input [31:0] Mem8,
     input [1:0] sel,
-    output reg out[31:0]
+    output reg [31:0] out
 );
 
 always @* begin

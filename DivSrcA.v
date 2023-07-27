@@ -2,7 +2,7 @@ module DivSrcA(
     input [31:0] A,
     input [31:0] dividendoOut,
     input sel,
-    output reg out[31:0]
+    output reg [31:0] out
 );
 
 always @* begin
