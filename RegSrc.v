@@ -1,5 +1,5 @@
 module RegSrc (
-    input [31:00]in,
+    input [31:0]in,
     input sel,
     output reg in_divisor[31:0],
     output reg in_dividendo[31:0]
