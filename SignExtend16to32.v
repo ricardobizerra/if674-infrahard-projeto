@@ -1,4 +1,4 @@
-module SignExtend16to32(
+module signextend16to32(
     input wire [15:0]in,
     output wire [31:0]out
 );

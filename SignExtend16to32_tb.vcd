@@ -1,5 +1,5 @@
 $date
-	Fri Jul 28 23:36:12 2023
+	Sat Jul 29 00:02:55 2023
 $end
 $version
 	Icarus Verilog
@@ -7,7 +7,7 @@ $end
 $timescale
 	1ps
 $end
-$scope module SignExtend16to32_tb $end
+$scope module signextend16to32_tb $end
 $var wire 32 ! out_TB [31:0] $end
 $var reg 16 " in_TB [15:0] $end
 $scope module DUT $end

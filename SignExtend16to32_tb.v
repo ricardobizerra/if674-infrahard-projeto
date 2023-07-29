@@ -1,18 +1,18 @@
 `timescale 1ns/1ps
-`include "SignExtend16to32.v"
+`include "signextend16to32.v"
 
-module SignExtend16to32_tb();
+module signextend16to32_tb();
     
     reg [15:0] in_TB;
     wire [31:0] out_TB;
 
-    SignExtend16to32 DUT(.in(in_TB), .out(out_TB));
+    signextend16to32 DUT(.in(in_TB), .out(out_TB));
 
     initial
 		begin
 		
-			$dumpfile("SignExtend16to32_tb.vcd");
-			$dumpvars(0,SignExtend16to32_tb);
+			$dumpfile("signextend16to32_tb.vcd");
+			$dumpvars(0,signextend16to32_tb);
 		
 			in_TB=1010110101101010; 
             #10 in_TB=0010110101101010;

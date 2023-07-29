@@ -1,4 +1,4 @@
-module SignExtend8to32(
+module signextend8to32(
     input wire[7:0] in;
     output wire[31:0] out;
 );
