@@ -1,0 +1,44 @@
+$date
+	Fri Jul 28 23:36:12 2023
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module SignExtend16to32_tb $end
+$var wire 32 ! out_TB [31:0] $end
+$var reg 16 " in_TB [15:0] $end
+$scope module DUT $end
+$var wire 16 # in [15:0] $end
+$var wire 32 $ out [31:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+$end
+#0
+$dumpvars
+b11111111111111111001100111010010 $
+b1001100111010010 #
+b1001100111010010 "
+b11111111111111111001100111010010 !
+$end
+#10000
+b1100111010010 !
+b1100111010010 $
+b1100111010010 "
+b1100111010010 #
+#25000
+b11111111111111111101100111010010 !
+b11111111111111111101100111010010 $
+b1101100111010010 "
+b1101100111010010 #
+#45000
+b111000001010010 !
+b111000001010010 $
+b111000001010010 "
+b111000001010010 #
+#145000
