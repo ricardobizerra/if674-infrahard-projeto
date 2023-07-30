@@ -1,18 +1,16 @@
 module RegDst (
-    input [4:0] instruction2016,
-    input [4:0] instruction1511,
-    input [4:0] reg29,
-    input [4:0] reg31,
+    input [4:0] rt,
+    input [15:0] rd,
     input [1:0] sel,
     output reg [4:0] 
 );
 
-always @* begin
+always @(sel) begin
     case (sel)
-        2'b00: out = instruction2016;
-        2'b01: out = instruction1511;
-        2'b10: out = reg29;
-        2'b11: out = reg31;
+        2'b00: out = rt;
+        2'b01: out = rd[15:11];
+        2'b10: out = 5'b11101; // reg $29
+        2'b11: out = 5'b11111; // reg $31
     endcase
 end
 endmodule

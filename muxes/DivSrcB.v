@@ -5,7 +5,7 @@ module DivSrcB(
     output reg [31:0] out
 );
 
-always @* begin
+always @(sel) begin
     case (sel)
     1'b0: out = B;
     1'b1: out = divisorOut;

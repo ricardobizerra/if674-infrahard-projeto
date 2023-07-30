@@ -7,10 +7,10 @@ module AluSourceB(
     output reg [31:0] out
 );
 
-always @* begin
+always @(sel) begin
     case (sel)
-        3'b000: out = in[0];
-        3'b001: out = 4;
+        3'b000: out = B;
+        3'b001: out = 32'b00000000000000000000000000000100; // 4
         3'b010: out = instructionExtended;
         3'b011: out = instructionExtendedShiftLeft2;
         3'b100: out = A;

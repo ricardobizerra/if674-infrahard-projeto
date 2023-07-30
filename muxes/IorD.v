@@ -8,7 +8,7 @@ module IorD (
     output reg [31:0] out
 );
 
-always @* begin
+always @(sel) begin
     case (sel)
         3'b000: out = PC;
         3'b001: out = AluOut;

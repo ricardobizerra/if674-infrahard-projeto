@@ -5,7 +5,7 @@ module RegSrc (
     output reg [31:0] in_dividendo
 );
 
-always @* begin
+always @(sel) begin
     case (sel)
         1'b0: in_dividendo = in;
         1'b1: in_divisor = in;
