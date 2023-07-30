@@ -1,4 +1,4 @@
-module AluSourceA (
+module mux_alu_srcA (
     input [31:0]PC,
     input [31:0]A,
     input [31:0]MDRout,

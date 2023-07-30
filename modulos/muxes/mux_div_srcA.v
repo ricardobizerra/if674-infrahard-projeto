@@ -1,4 +1,4 @@
-module DivSrcA(
+module mux_div_srcA(
     input [31:0] A,
     input [31:0] dividendoOut,
     input sel,

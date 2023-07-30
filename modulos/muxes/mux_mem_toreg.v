@@ -1,4 +1,4 @@
-module MentoReg (
+module mux_mem_toreg (
     input [31:0] AluOut,
     input [31:0] MDRout,
     input [31:0] Hiout,

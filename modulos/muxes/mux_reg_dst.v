@@ -1,4 +1,4 @@
-module RegDst (
+module mux_reg_dst (
     input [4:0] rt,
     input [15:0] rd,
     input [1:0] sel,

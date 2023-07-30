@@ -1,4 +1,4 @@
-module RegSrc (
+module reg_src (
     input [31:0]in,
     input sel,
     output reg [31:0] in_divisor,

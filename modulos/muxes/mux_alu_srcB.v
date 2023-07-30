@@ -1,4 +1,4 @@
-module AluSourceB(
+module mux_alu_srcB(
     input [31:0] B,
     input [31:0] instructionExtended,
     input [31:0] instructionExtendedShiftLeft2,

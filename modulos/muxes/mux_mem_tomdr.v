@@ -1,4 +1,4 @@
-module MemtoMDR(
+module mux_mem_tomdr(
     input [31:0] Mem32,
     input [31:0] Mem16,
     input [31:0] Mem8,

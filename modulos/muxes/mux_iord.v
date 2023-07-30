@@ -1,4 +1,4 @@
-module IorD (
+module mux_iord (
     input [31:0] PC,
     input [31:0] AluOut,
     input [31:0] Except,

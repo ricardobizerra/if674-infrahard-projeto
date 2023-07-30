@@ -1,4 +1,4 @@
-module PcSource (
+module mux_pc_src (
     input [31:0] AluOutDirect,
     input [31:0] AluOut,
     input [31:0] instructionShiftLeft2,
