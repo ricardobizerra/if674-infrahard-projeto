@@ -45,10 +45,16 @@ module cpu (
 // Control wires 1 bit
     wire PC_write;
     wire branch;
-    wire mem_read;
-    wire mem_write;
+    wire MEM_wr;
     wire IR_write;
-    wire reg_write;
+    wire A_write;
+    wire B_write;
+    wire MDR_write;
+    wire ALUReg_write;
+    wire EPC_write;
+    wire Hi_write;
+    wire Lo_write;
+    wire REG_write;
     wire less_than;
     wire div;
     wire mult;
@@ -57,49 +63,67 @@ module cpu (
     wire div_srcA;
     wire div_srcB;
     wire shift_src;
-    wire EPC_write;
-    wire hi_write;
-    wire lo_write;
 
 // Control wires 2 bit
 
     wire [1:0] reg_dst;
     wire [1:0] except;
-    wire [1:0] mem_toMDR;
+    wire [1:0] MEM_toMDR;
     wire [1:0] shift_src;
     wire [1:0] BtoC;
-    wire [1:0] alu_srcA;
+    wire [1:0] ALU_srcA;
 
 // Control wires 3 bit
 
     wire [2:0] IorD;
-    wire [2:0] alu_srcB;
-    wire [2:0] aluOP;
+    wire [2:0] ALU_srcB;
+    wire [2:0] ALU_OP;
     wire [2:0] PC_src;
     wire [2:0] regOP;
 
 // Control wires 4 bit
 
-    wire [3:0] mem_toreg;
+    wire [3:0] MEM_toreg;
 
 // Instruction wires
 
-    wire[5:0] instr31_26; // funct
-    wire[4:0] instr25_21; // rs
-    wire[4:0] instr20_16; // rt
-    wire[15:0] instr15_0; // address/immediate
-    wire[25:0] instr25_0; // offset
+    wire[5:0] OPCODE; // funct
+    wire[4:0] RS; // rs
+    wire[4:0] RT; // rt
+    wire[15:0] IMMEDIATE; // address/immediate
+    wire[25:0] OFFSET; // offset
 
 // Data wires
 
     wire [31:0] PC_in;
     wire [31:0] PC_out;
+    wire [31:0] MEM_address;
+    wire [31:0] MEM_out;
+    wire [31:0] combC_out;
+    wire [31:0] BREG_to_A;
+    wire [31:0] BREG_to_B;
+    wire [31:0] A_out;
+    wire [31:0] B_out;
+    wire [31:0] SXTND8TO32__MEM_out;
+    wire [31:0] SXTND16TO32_IMMEDIATE_out;
+    wire [31:0] ALU_A_in;
+    wire [31:0] ALU_B_in;
+    wire [31:0] ALU_out;
+    wire [31:0] SL2_IMMEDIATE_out;
+    wire [31:0] MDR_in;
+    wire [31:0] MDR_out;
+    wire [31:0] ALUReg_out;
+    wire [31:0] MDR_out;
+
+// Data wires 5 bits
+
+    wire [4:0] REG_write_in;
 
 // Flag wires    
 
+    wire ov;
     wire zr;
-    wire n;
-    wire o;
+    wire neg;
     wire eq;
     wire lt;
     wire gt;
@@ -116,19 +140,25 @@ module cpu (
     Registrador A(
       clk,
       reset,
-      
+      A_write,
+      BREG_to_A,
+      A_out
     );
 
     Registrador B(
       clk,
       reset,
-      
+      B_write,
+      BREG_to_B,
+      B_out
     );
 
-    Registrador AluOut(
+    Registrador ALUReg(
       clk,
       reset,
-      
+      ALUReg_write,
+      ALU_out,
+      ALUReg_out
     );
 
     Registrador EPC(
@@ -140,7 +170,9 @@ module cpu (
     Registrador MDR(
       clk,
       reset,
-      
+      MDR_write,
+      MDR_in,
+      MDR_out
     );
 
     Registrador Hi(
@@ -155,14 +187,144 @@ module cpu (
       
     );
 
-// Memoria
-
-    Memoria MEM(
-        
-    );
-
 // Muxes
 
+    mux_alu_srcA M_ALU_SRCA(
+      PC_out,
+      A_out,
+      MDR_out,
+      ALU_srcA,
+      ALU_A_in
+    );
 
+    mux_alu_srcB M_ALU_SRCB(
+      B_out,
+      SXTND16TO32_IMMEDIATE_out,
+      SL2_IMMEDIATE_out,
+      A_out,
+      ALU_srcB,
+      ALU_B_in  
+    );
+
+    mux_div_srcA M_DIV_SRCA(
+
+    );
+
+    mux_div_srcB M_DIV_SRCB(
+
+    );
+
+    mux_except M_EXCEPT(
+
+    );
+
+    mux_iord M_IORD(
+
+    );
+
+    mux_mem_tomdr M_MEM_TOMDR(
+
+    );
+
+    mux_mem_toreg M_MEM_TOREG(
+        // Aluout
+        // MDRout
+        // Hiout
+        // Loout
+        // shiftRegOut
+        // offsetshiftleft16
+      MEM_toreg,
+      BREG_write_data
+    );
+
+    mux_pc_src M_PC_SRC(
+
+    );
+
+    mux_reg_dst M_REG_DST(
+      RT,
+      IMMEDIATE,
+      reg_dst,
+      BREG_write_reg
+    );
+
+// Shifts
+
+    shift_left2 SL2_IMMEDIATE(
+      SXTND16TO32_IMMEDIATE_out,
+      SL2_IMMEDIATE_out
+    );
+
+    shift_left16 SL16(
+
+    );
+
+    shift_jump SJ(
+
+    );
+
+// Sign Extends 
+
+    sign_extend8to32  SXTND8TO32_MEM(
+      MEM_out,
+      SXTND8TO32_MEM_out
+    );
+
+    sign_extend16to32 SXTND16TO32_IMMEDIATE(
+      IMMEDIATE,
+      SXTND16TO32_IMMEDIATE_out
+    );
+
+// Memória
+
+    Memoria MEM(
+      MEM_address,
+      clk,
+      MEM_wr,
+      combC_out,
+      MEM_out
+    );
+
+// IR 
+
+    Instr_Reg IR(
+      clk,
+      reset,
+      IR_write,
+      MEM_out,
+      OPCODE,
+      RS,
+      RT,
+      IMMEDIATE
+    );
+
+// BReg
+
+    Banco_reg BREG(
+      clk,
+      reset,
+      REG_write,
+      RS,
+      RT,
+      BREG_write_reg,
+      BREG_write_data,
+      BREG_to_A,
+      BREG_to_B
+    );
+
+  // ULA
+
+    ula32 ALU(
+      ALU_A_in,
+      ALU_B_in,
+      ALU_OP,
+      ALU_out,
+      ov,
+      neg,
+      zr,
+      eq,
+      gt,
+      lt
+    );
 
 endmodule

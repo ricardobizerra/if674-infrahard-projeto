@@ -1,4 +1,4 @@
-module shi_ftjump(
+module shift_jump(
     input wire[25:0] data_in,
     input wire[31:0] PC,
     output wire[31:0] data_out
