@@ -8,7 +8,7 @@ module mux_pc_src (
     output reg [31:0] out
 );
 
-always @(sel) begin
+always @* begin
     case (sel)
         3'b000: out = AluOutDirect;
         3'b001: out = AluOut;

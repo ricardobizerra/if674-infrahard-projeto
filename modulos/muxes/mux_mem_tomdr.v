@@ -6,7 +6,7 @@ module mux_mem_tomdr(
     output reg [31:0] out
 );
 
-always @(sel) begin
+always @* begin
     case (sel)
     2'b00: out = Mem32;
     2'b01: out = Mem16;

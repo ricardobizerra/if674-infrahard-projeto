@@ -3,7 +3,7 @@ module mux_except(
     output reg [31:0] out
 );
 
-always @(sel) begin
+always @* begin
     case (sel)
     2'b00: out = 32'b00000000000000000000000011111101; // 253
     2'b01: out = 32'b00000000000000000000000011111110; // 254

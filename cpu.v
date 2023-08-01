@@ -42,7 +42,7 @@ module cpu (
     input wire reset
 );
 
-// Control wires 1 bit
+// Control wires with 1 bit
     wire PC_write;
     wire branch;
     wire MEM_wr;
@@ -64,7 +64,7 @@ module cpu (
     wire div_srcB;
     wire shift_src;
 
-// Control wires 2 bit
+// Control wires with 2 bit
 
     wire [1:0] reg_dst;
     wire [1:0] except;
@@ -73,7 +73,7 @@ module cpu (
     wire [1:0] BtoC;
     wire [1:0] ALU_srcA;
 
-// Control wires 3 bit
+// Control wires witht 3 bit
 
     wire [2:0] IorD;
     wire [2:0] ALU_srcB;
@@ -81,17 +81,18 @@ module cpu (
     wire [2:0] PC_src;
     wire [2:0] regOP;
 
-// Control wires 4 bit
+// Control wires with 4 bit
 
     wire [3:0] MEM_toreg;
 
 // Instruction wires
 
-    wire[5:0] OPCODE; // funct
-    wire[4:0] RS; // rs
-    wire[4:0] RT; // rt
-    wire[15:0] IMMEDIATE; // address/immediate
-    wire[25:0] OFFSET; // offset
+    wire[5:0] OPCODE; 
+    wire[4:0] RS; 
+    wire[4:0] RT; 
+    wire[5:0] FUNCT;  
+    wire[15:0] IMMEDIATE; 
+    wire[25:0] OFFSET;
 
 // Data wires
 
@@ -115,25 +116,25 @@ module cpu (
     wire [31:0] ALUReg_out;
     wire [31:0] MDR_out;
 
-// Data wires 5 bits
+// Data wires with less than 32 bits
 
     wire [4:0] REG_write_in;
 
 // Flag wires    
 
-    wire ov;
-    wire zr;
-    wire neg;
-    wire eq;
-    wire lt;
-    wire gt;
+    wire OV;
+    wire ZR;
+    wire NEG;
+    wire EQ;
+    wire LT;
+    wire GT;
 
 // Registradores
     Registrador PC(
       clk,
       reset,
       PC_write,
-      PC_in
+      PC_in,
       PC_out
     );
 
@@ -312,19 +313,70 @@ module cpu (
       BREG_to_B
     );
 
-  // ULA
+// ULA
 
     ula32 ALU(
       ALU_A_in,
       ALU_B_in,
       ALU_OP,
       ALU_out,
-      ov,
-      neg,
-      zr,
-      eq,
-      gt,
-      lt
+      OV,
+      NEG,
+      ZR,
+      EQ,
+      GT,
+      LT
+    );
+
+// ShiferReg 
+
+// Unidade de Controle
+
+    FUNCT = IMMEDIATE[5:0];
+    control_unit CTRL(
+      clk,
+      reset,
+      OV,
+      ZR,
+      NEG,
+      EQ,
+      GT,
+      LT,
+      OPCODE,
+      FUNCT,
+      PC_write,
+      branch,
+      MEM_wr,
+      IR_write,
+      A_write,
+      B_write,
+      MDR_write,
+      ALUReg_write,
+      EPC_write,
+      Hi_write,
+      Lo_write,
+      REG_write,
+      less_than,
+      div,
+      mult,
+      overflow,
+      dzero,
+      div_srcA,
+      div_srcB,
+      shift_src,
+      reg_dst,
+      except,
+      MEM_toMDR,
+      shift_src,
+      BtoC,
+      ALU_srcA,
+      IorD,
+      ALU_srcB,
+      ALU_OP,
+      PC_src,
+      regOP,
+      MEM_toreg,
+      reset_out 
     );
 
 endmodule

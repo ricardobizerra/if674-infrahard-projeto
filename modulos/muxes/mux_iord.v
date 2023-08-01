@@ -8,7 +8,7 @@ module mux_iord (
     output reg [31:0] out
 );
 
-always @(sel) begin
+always @* begin
     case (sel)
         3'b000: out = PC;
         3'b001: out = AluOut;

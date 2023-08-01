@@ -9,7 +9,7 @@ module mux_mem_toreg (
     output reg [31:0] out
 );
 
-always @(sel) begin
+always @* begin
     case (sel)
         4'b0000: out = AluOut;
         4'b0001: out = MDRout;

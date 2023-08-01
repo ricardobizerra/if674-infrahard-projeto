@@ -7,7 +7,7 @@ module mux_alu_srcB(
     output reg [31:0] out
 );
 
-always @(sel) begin
+always @* begin
     case (sel)
         3'b000: out = B;
         3'b001: out = 32'b00000000000000000000000000000100; // 4

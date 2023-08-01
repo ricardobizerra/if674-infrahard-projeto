@@ -5,7 +5,7 @@ module mux_reg_dst (
     output reg [4:0] out 
 );
 
-always @(sel) begin
+always @* begin
     case (sel)
         2'b00: out = rt;
         2'b01: out = immediate[15:11]; // rd 

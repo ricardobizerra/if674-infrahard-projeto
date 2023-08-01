@@ -5,7 +5,7 @@ module mux_div_srcB(
     output reg [31:0] out
 );
 
-always @(sel) begin
+always @* begin
     case (sel)
     1'b0: out = B;
     1'b1: out = divisorOut;

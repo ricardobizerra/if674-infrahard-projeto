@@ -5,8 +5,7 @@ module combC(
     output reg[31:0] data_out
 );
 
-    always @(sel) 
-    begin
+    always @* begin
         case (sel)
             2b'00: data_out = B; 
             2b'01: data_out = {mem[31:16],B[15:0]};

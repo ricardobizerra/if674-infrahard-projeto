@@ -6,7 +6,7 @@ module mux_alu_srcA (
     output reg [31:0] out
 );
 
-always @(sel) begin
+always @* begin
     case (sel)
         2'b00: out = PC;
         2'b01: out = A;

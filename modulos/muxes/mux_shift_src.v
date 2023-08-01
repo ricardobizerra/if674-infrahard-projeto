@@ -5,7 +5,7 @@ module mux_shift_src(
     output reg [31:0] out
 );
 
-always @(sel) begin
+always @* begin
     case (sel)
     1'b0: out = immediate[10:6];
     1'b1: out = B;
