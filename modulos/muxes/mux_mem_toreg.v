@@ -1,11 +1,11 @@
 module mux_mem_toreg (
-    input [31:0] AluOut,
-    input [31:0] MDRout,
-    input [31:0] Hiout,
-    input [31:0] Loout,
-    input [31:0] shiftRegOut,
-    input [31:0] offsetShiftLeft16,
-    input [3:0] sel,
+    input wire [31:0] AluOut,
+    input wire [31:0] MDRout,
+    input wire [31:0] Hiout,
+    input wire [31:0] Loout,
+    input wire [31:0] shiftRegOut,
+    input wire [31:0] offsetShiftLeft16,
+    input wire [3:0] sel,
     output reg [31:0] out
 );
 

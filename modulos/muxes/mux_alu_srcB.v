@@ -1,9 +1,9 @@
 module mux_alu_srcB(
-    input [31:0] B,
-    input [31:0] instructionExtended,
-    input [31:0] instructionExtendedShiftLeft2,
-    input [31:0] A,
-    input [2:0] sel,
+    input wire [31:0] B,
+    input wire [31:0] instructionExtended,
+    input wire [31:0] instructionExtendedShiftLeft2,
+    input wire [31:0] A,
+    input wire [2:0] sel,
     output reg [31:0] out
 );
 

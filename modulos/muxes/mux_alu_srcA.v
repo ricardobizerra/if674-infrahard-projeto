@@ -1,8 +1,8 @@
 module mux_alu_srcA (
-    input [31:0]PC,
-    input [31:0]A,
-    input [31:0]MDRout,
-    input [1:0] sel,
+    input wire [31:0]PC,
+    input wire [31:0]A,
+    input wire [31:0]MDRout,
+    input wire [1:0] sel,
     output reg [31:0] out
 );
 

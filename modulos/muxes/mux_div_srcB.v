@@ -1,7 +1,7 @@
 module mux_div_srcB(
-    input [31:0] B,
-    input [31:0] divisorOut,
-    input sel,
+    input wire [31:0] B,
+    input wire [31:0] divisorOut,
+    input wire sel,
     output reg [31:0] out
 );
 

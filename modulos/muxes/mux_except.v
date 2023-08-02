@@ -1,5 +1,5 @@
 module mux_except(
-    input [1:0] sel,
+    input wire [1:0] sel,
     output reg [31:0] out
 );
 

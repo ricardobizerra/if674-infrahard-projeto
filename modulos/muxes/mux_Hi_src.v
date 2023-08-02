@@ -1,7 +1,7 @@
 module Hi_src(
-    input [31:0] DIV_max,
-    input [31:0] MULT_max,
-    input sel,
+    input wire [31:0] DIV_max,
+    input wire [31:0] MULT_max,
+    input wire sel,
     output reg [31:0] out
 );
 

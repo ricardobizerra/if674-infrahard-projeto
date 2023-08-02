@@ -1,8 +1,8 @@
 module mux_mem_tomdr(
-    input [31:0] Mem32,
-    input [31:0] Mem16,
-    input [31:0] Mem8,
-    input [1:0] sel,
+    input wire [31:0] Mem32,
+    input wire [31:0] Mem16,
+    input wire [31:0] Mem8,
+    input wire [1:0] sel,
     output reg [31:0] out
 );
 

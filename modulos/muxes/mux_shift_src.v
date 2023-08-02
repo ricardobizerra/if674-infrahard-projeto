@@ -1,7 +1,7 @@
 module mux_shift_src(
-    input [15:0] immediate,
-    input [31:0] B,
-    input sel,
+    input wire [15:0] immediate,
+    input wire [31:0] B,
+    input wire sel,
     output reg [31:0] out
 );
 

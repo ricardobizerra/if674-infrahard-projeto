@@ -1,10 +1,10 @@
 module mux_iord (
-    input [31:0] PC,
-    input [31:0] AluOut,
-    input [31:0] Except,
-    input [31:0] A,
-    input [31:0] B,
-    input [2:0] sel,
+    input wire [31:0] PC,
+    input wire [31:0] AluOut,
+    input wire [31:0] Except,
+    input wire [31:0] A,
+    input wire [31:0] B,
+    input wire [2:0] sel,
     output reg [31:0] out
 );
 

@@ -1,7 +1,7 @@
 module mux_div_srcA(
-    input [31:0] A,
-    input [31:0] dividendoOut,
-    input sel,
+    input wire [31:0] A,
+    input wire [31:0] dividendoOut,
+    input wire sel,
     output reg [31:0] out
 );
 

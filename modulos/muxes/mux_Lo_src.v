@@ -1,7 +1,7 @@
 module Lo_src(
-    input [31:0] DIV_min,
-    input [31:0] MULT_min,
-    input sel,
+    input wire [31:0] DIV_min,
+    input wire [31:0] MULT_min,
+    input wire sel,
     output reg [31:0] out
 );
 

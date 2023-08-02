@@ -1,10 +1,10 @@
 module mux_pc_src (
-    input [31:0] AluOutDirect,
-    input [31:0] AluOut,
-    input [31:0] instructionShiftLeft2,
-    input [31:0] MemSignExtend,
-    input [31:0] EPCOut,
-    input [2:0] sel,
+    input wire [31:0] AluOutDirect,
+    input wire [31:0] AluOut,
+    input wire [31:0] instructionShiftLeft2,
+    input wire [31:0] MemSignExtend,
+    input wire [31:0] EPCOut,
+    input wire [2:0] sel,
     output reg [31:0] out
 );
 
