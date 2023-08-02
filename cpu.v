@@ -56,8 +56,8 @@ module cpu (
     wire Lo_write;
     wire REG_write;
     wire less_than;
-    wire div;
-    wire mult;
+    wire DIV_on;
+    wire MULT_on;
     wire overflow;
     wire dzero;
     wire div_srcA;
@@ -276,7 +276,7 @@ module cpu (
       SXTND16TO32_IMMEDIATE_out
     );
 
-// Memória
+// Memory
 
     Memoria MEM(
       MEM_address,
@@ -328,7 +328,22 @@ module cpu (
       LT
     );
 
-// ShiferReg 
+// ShiftReg 
+    RegDesloc REGSHIFT(
+
+    );
+
+// Divider
+
+    divider DIV(
+
+    );
+    
+// Multiplier
+
+    multiplier MULT(
+
+    );
 
 // Unidade de Controle
 
@@ -357,8 +372,8 @@ module cpu (
       Lo_write,
       REG_write,
       less_than,
-      div,
-      mult,
+      DIV_on,
+      MULT_on,
       overflow,
       dzero,
       div_srcA,
@@ -375,8 +390,7 @@ module cpu (
       ALU_OP,
       PC_src,
       regOP,
-      MEM_toreg,
-      reset_out 
+      MEM_toreg
     );
 
 endmodule
