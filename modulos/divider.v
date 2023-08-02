@@ -1,7 +1,7 @@
 module divider(
-    input wire div_on,  
     input wire clk, 
     input wire reset,
+    input wire div_on,  
     input wire SrcA, 
     input wire SrcB,
     output wire Dzero,
