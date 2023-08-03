@@ -31,13 +31,12 @@ module control_unit(
     output wire div_srcA,
     output wire div_srcB,
     output wire shift_src,
-    output wire Hi_src;
-    output wire Lo_src;
+    output wire Hi_src,
+    output wire Lo_src,
 // Control wires with 2 bit   
     output wire [1:0] reg_dst,
     output wire [1:0] except,
     output wire [1:0] MEM_toMDR,
-    output wire [1:0] shift_src,
     output wire [1:0] BtoC,
     output wire [1:0] ALU_srcA,
 // Control wires with 3 bit    
