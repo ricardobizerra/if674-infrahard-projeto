@@ -4,6 +4,6 @@ module shift_jump(
     output wire[31:0] data_out
 );
 
-    assign data_out = {PC[31:28], data_in << 2}
+    assign data_out = {PC[31:28], data_in << 2};
     
 endmodule

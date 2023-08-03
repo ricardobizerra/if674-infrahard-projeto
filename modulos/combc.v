@@ -9,7 +9,7 @@ module combC(
         case (sel)
             2'b00: data_out = B; 
             2'b01: data_out = {mem[31:16],B[15:0]};
-            2'b10: data_out =  {mem[31:8],B[7:0]}
+            2'b10: data_out = {mem[31:8],B[7:0]};
         endcase    
     end
     

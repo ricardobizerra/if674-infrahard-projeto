@@ -13,7 +13,6 @@ module control_unit(
     input wire [5:0] FUNCT,
 // Control wires with 1 bit
     output wire PC_write,
-    output wire branch,
     output wire MEM_wr,
     output wire IR_write,
     output wire A_write,

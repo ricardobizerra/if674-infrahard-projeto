@@ -5,7 +5,7 @@ module divider(
     input wire SrcA, 
     input wire SrcB,
     output wire Dzero,
-    output wire [31:0]min 
+    output wire [31:0]min, 
     output wire [31:0]max 
 );
 

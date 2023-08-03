@@ -46,7 +46,6 @@ module cpu (
 
 // Control wires with 1 bit
     wire PC_write;
-    wire branch;
     wire MEM_wr;
     wire IR_write;
     wire A_write;
@@ -468,7 +467,6 @@ module cpu (
       OPCODE,
       FUNCT,
       PC_write,
-      branch,
       MEM_wr,
       IR_write,
       A_write,
