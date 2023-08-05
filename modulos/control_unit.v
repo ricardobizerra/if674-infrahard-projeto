@@ -78,10 +78,12 @@ module control_unit(
     parameter ST_sub         = 7'd9;
     parameter ST_and         = 7'd10;
     parameter ST_BREG_write  = 7'd11;
+    parameter ST_BREG_write2  = 7'd12;
 
     // I instructions
 
-    parameter ST_addi        = 7'd12;
+    parameter ST_addi        = 7'd13;
+    parameter ST_addiu        = 7'd14;
 
 
 // Opcodes Parameters
@@ -295,7 +297,7 @@ always @(posedge clk) begin
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b000;
                 ALU_OP = 3'b001;
-                ALUReg_write = 1'b1
+                ALUReg_write = 1'b1;
                 COUNTER = COUNTER + 1;
             end
 
@@ -538,7 +540,8 @@ always @(posedge clk) begin
                 end
 
                 ADDIU:begin
-                    
+                    STATE = ST_addiu;
+                    COUNTER = COUNTER +1;
                 end
 
                 BEQ:begin
