@@ -127,38 +127,6 @@ initial begin
 end
 
 always @(posedge clk) begin
-    default:PC_write     = 1'b0;
-            branch       = 1'b0;
-            MEM_wr       = 1'b0;
-            IR_write     = 1'b0;
-            A_write      = 1'b0;
-            B_write      = 1'b0;
-            MDR_write    = 1'b0;
-            ALUReg_write = 1'b0;
-            EPC_write    = 1'b0;
-            Hi_write     = 1'b0;
-            Lo_write     = 1'b0;
-            REG_write    = 1'b0;
-            less_than    = 1'b0;
-            DIV_on       = 1'b0;
-            MULT_on      = 1'b0;
-            div_srcA     = 1'b0;
-            div_srcB     = 1'b0;
-            shift_src    = 1'b0;
-            Hi_src       = 1'b0;
-            Lo_src       = 1'b0;
-            reg_dst      = 2'b00; 
-            except       = 2'b00; 
-            MEM_toMDR    = 2'b00;
-            shift_src    = 2'b00;
-            BtoC         = 2'b00;
-            ALU_srcA     = 2'b00;
-            IorD         = 3'b000;
-            ALU_srcB     = 3'b000;
-            ALU_OP       = 3'b000;
-            PC_src       = 3'b000;
-            regOP        = 3'b000;
-            MEM_toreg    = 4'b0000;
     if (reset == 1'b1) begin
         STATE = ST_fetch0;
         // Setting ALL signals to zero
@@ -511,6 +479,39 @@ always @(posedge clk) begin
             ST_except:begin
                 STATE = ST_fetch0;
             end
+
+            default:PC_write     = 1'b0;
+            branch       = 1'b0;
+            MEM_wr       = 1'b0;
+            IR_write     = 1'b0;
+            A_write      = 1'b0;
+            B_write      = 1'b0;
+            MDR_write    = 1'b0;
+            ALUReg_write = 1'b0;
+            EPC_write    = 1'b0;
+            Hi_write     = 1'b0;
+            Lo_write     = 1'b0;
+            REG_write    = 1'b0;
+            less_than    = 1'b0;
+            DIV_on       = 1'b0;
+            MULT_on      = 1'b0;
+            div_srcA     = 1'b0;
+            div_srcB     = 1'b0;
+            shift_src    = 1'b0;
+            Hi_src       = 1'b0;
+            Lo_src       = 1'b0;
+            reg_dst      = 2'b00; 
+            except       = 2'b00; 
+            MEM_toMDR    = 2'b00;
+            shift_src    = 2'b00;
+            BtoC         = 2'b00;
+            ALU_srcA     = 2'b00;
+            IorD         = 3'b000;
+            ALU_srcB     = 3'b000;
+            ALU_OP       = 3'b000;
+            PC_src       = 3'b000;
+            regOP        = 3'b000;
+            MEM_toreg    = 4'b0000;
     end
 end
 endmodule
