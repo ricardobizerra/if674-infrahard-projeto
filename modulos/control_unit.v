@@ -70,7 +70,7 @@ module control_unit(
     parameter ST_noopcode    = 7'd4;
     parameter ST_overflow    = 7'd5;
     parameter ST_divzr       = 7'd6;
-    parameter ST_except       = 7'd7;
+    parameter ST_except      = 7'd7;
 
     // R instructions
 
@@ -78,6 +78,10 @@ module control_unit(
     parameter ST_sub         = 7'd9;
     parameter ST_and         = 7'd10;
     parameter ST_BREG_write  = 7'd11;
+
+    // I instructions
+
+    parameter ST_addi        = 7'd12;
 
 
 // Opcodes Parameters
@@ -291,7 +295,7 @@ always @(posedge clk) begin
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b000;
                 ALU_OP = 3'b001;
-                ALUReg_write = 1'b1;
+                ALUReg_write = 1'b1
                 COUNTER = COUNTER + 1;
             end
 
@@ -324,6 +328,19 @@ always @(posedge clk) begin
                     reg_dst = 2'b01;
                     MEM_toreg = 4'b0000;
                     COUNTER = 7'b0000000;
+                end
+            end
+
+            ST_BREG_write2:begin
+                if(OV) begin
+                    STATE = ST_overflow;
+                    COUNTER = COUNTER + 1;
+                end
+                else begin
+                    STATE = ST_fetch0;
+                    REG_write = 1'b1;
+                    MEM_toreg = 4'b0000;
+                    reg_dst = 2'b00;
                 end
             end
 
@@ -381,6 +398,15 @@ always @(posedge clk) begin
                 PC_src  = 3'b011;
                 PC_write = 1'b1;
                 COUNTER = 7'b0000000;
+            end
+
+            ST_addi:begin
+                STATE = ST_BREG_write2;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b010;
+                ALU_OP = 3'b001;
+                ALUReg_write = 1'b1;
+                COUNTER = COUNTER + 1;
             end
 
             default:begin
@@ -498,7 +524,8 @@ always @(posedge clk) begin
                 end
                 // I instructions 
                 ADDI:begin
-                    
+                    STATE = ST_addi;
+                    COUNTER = COUNTER + 1;
                 end
 
                 ADDIU:begin
