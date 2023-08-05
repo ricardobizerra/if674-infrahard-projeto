@@ -10,7 +10,7 @@ module mux_alu_srcB(
 always @* begin
     case (sel)
         3'b000: out = B;
-        3'b001: out = 32'b00000000000000000000000000000100; // 4
+        3'b001: out = 32'd4; // 4
         3'b010: out = instructionExtended;
         3'b011: out = instructionExtendedShiftLeft2;
         3'b100: out = A;

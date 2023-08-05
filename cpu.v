@@ -1,13 +1,5 @@
 // Importação de todas as unidades 
 
-// unidades dadas
-
-`include "components_given/Banco_reg.vhd"
-`include "components_given/Instr_Reg.vhd"
-`include "components_given/Memoria.vhd"
-`include "components_given/RegDesloc.vhd"
-`include "components_given/Registrador.vhd"
-`include "components_given/ula32.vhd"
 
 // muxes
 
@@ -103,6 +95,8 @@ module cpu (
     wire [31:0] combC_out;
     wire [31:0] BREG_to_A;
     wire [31:0] BREG_to_B;
+    wire [31:0] BREG_write_data;
+    wire [4:0] BREG_write_reg;
     wire [31:0] A_out;
     wire [31:0] B_out;
     wire [31:0] SXTND8TO32_MEM_out;
@@ -123,7 +117,7 @@ module cpu (
     wire [31:0] Hi_out;
     wire [31:0] Lo_in;
     wire [31:0] Lo_out;
-    wire [31:0] N;
+    wire [4:0] N;
     wire [31:0] REGSHIFT_out;
     wire [31:0] except_out;
     wire [31:0] DIV_min;
@@ -152,7 +146,7 @@ module cpu (
       clk,
       reset,
       PC_write,
-      PC_in,
+      PC_src_out,
       PC_out
     );
 
@@ -229,14 +223,6 @@ module cpu (
       A_out,
       ALU_srcB,
       ALU_srcB_out  
-    );
-
-    mux_div_srcA M_DIV_SRCA(
-
-    );
-
-    mux_div_srcB M_DIV_SRCB(
-
     );
 
     mux_except M_EXCEPT(
@@ -409,7 +395,7 @@ module cpu (
     RegDesloc REGSHIFT(
       clk,
       reset,
-      REGOP,
+      regOP,
       N,
       ALU_srcB_out,
       REGSHIFT_out  

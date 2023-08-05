@@ -64,6 +64,7 @@ module control_unit(
     parameter ST_fetch0      = 7'd1;
     parameter ST_fetch1      = 7'd2;
     parameter ST_decode      = 7'd3;
+    parameter ST_decode2     = 7'd15;
 
     // exceptions states
 
@@ -211,7 +212,7 @@ always @(posedge clk) begin
                 regOP        = 3'b000;
                 MEM_toreg    = 4'b0000;
                 COUNTER = COUNTER + 1;
-                if (COUNTER == 7'b0000010) begin
+                if (COUNTER == 7'd2) begin
                     STATE = ST_fetch1;
                 end
                 else begin
@@ -255,7 +256,8 @@ always @(posedge clk) begin
                 MEM_toreg    = 4'b0000;
                 COUNTER      = COUNTER + 1;
             end
-            ST_decode:begin
+            ST_decode:begin     
+                STATE        = ST_decode2;   
                 PC_write     = 1'b1;
                 branch       = 1'b0;
                 MEM_wr       = 1'b0;
@@ -284,7 +286,7 @@ always @(posedge clk) begin
                 BtoC         = 2'b00;
                 ALU_srcA     = 2'b00;  ///
                 IorD         = 3'b001; 
-                ALU_srcB     = 3'b011; ///
+                ALU_srcB     = 3'b001; ///
                 ALU_OP       = 3'b001; ///
                 PC_src       = 3'b000;
                 regOP        = 3'b000;
@@ -326,6 +328,7 @@ always @(posedge clk) begin
                 end
                 else begin
                     STATE = ST_fetch0;
+                    COUNTER = 7'b0000000;
                     REG_write = 1'b1;
                     reg_dst = 2'b01;
                     MEM_toreg = 4'b0000;
@@ -340,6 +343,7 @@ always @(posedge clk) begin
                 end
                 else begin
                     STATE = ST_fetch0;
+                    COUNTER = 7'b0000000;
                     REG_write = 1'b1;
                     MEM_toreg = 4'b0000;
                     reg_dst = 2'b00;
@@ -454,9 +458,9 @@ always @(posedge clk) begin
                     regOP        = 3'b000;
                     MEM_toreg    = 4'b0000;
             end
-        endcase
+        
         // INSTRUCTIONS STATES
-        if(COUNTER == 7'b0000011) begin
+        ST_decode2: begin
             case(OPCODE)
                 // R instructions
                 R_OPCODE:begin
@@ -610,6 +614,7 @@ always @(posedge clk) begin
                 end
             endcase
         end
+        endcase
     end
 end
 endmodule

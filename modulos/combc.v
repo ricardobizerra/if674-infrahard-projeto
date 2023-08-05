@@ -1,4 +1,4 @@
-module combC(
+module combc(
     input wire [31:0] B,
     input wire [31:0] mem,
     input wire [1:0] sel,
