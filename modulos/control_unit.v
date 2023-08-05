@@ -558,7 +558,7 @@ always @(posedge clk) begin
                     regOP        = 3'b000;
                     MEM_toreg    = 4'b0000;
             end
-    end
+        end
     end
 end
 endmodule

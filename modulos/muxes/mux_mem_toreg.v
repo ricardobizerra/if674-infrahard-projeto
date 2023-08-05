@@ -19,7 +19,7 @@ always @* begin
         4'b0101: out = 32'b00000000000000000000000000000000;   // 0
         4'b0110: out = 32'b00000000000000000000000000000001;   // 1
         4'b0111: out = shiftRegOut;
-        4'b1000: out = offsetShiftLeft16ShiftLeft16;
+        4'b1000: out = offsetShiftLeft16;
     endcase
 end
 endmodule
