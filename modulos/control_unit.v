@@ -409,6 +409,15 @@ always @(posedge clk) begin
                 COUNTER = COUNTER + 1;
             end
 
+            ST_addiu:begin
+                STATE = ST_BREG_write2;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b010;
+                ALU_OP = 3'b001;
+                ALUReg_write = 1'b1;
+                COUNTER = COUNTER + 1;
+            end
+
             default:begin
                 PC_write     = 1'b0;
                     branch       = 1'b0;
