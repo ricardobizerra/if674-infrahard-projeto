@@ -62,20 +62,23 @@ module control_unit(
 // Main States Parameters
     // initial states
 
-    parameter ST_reset = 7'd0;
-    parameter ST_fetch0 = 7'd1;
-    parameter ST_fetch1 = 7'd2;
-    parameter ST_decode = 7'd3;
+    parameter ST_reset    = 7'd0;
+    parameter ST_fetch0   = 7'd1;
+    parameter ST_fetch1   = 7'd2;
+    parameter ST_decode   = 7'd3;
 
     // exceptions states
 
     parameter ST_noopcode = 7'd4;
     parameter ST_overflow = 7'd5;
-    parameter ST_divzr = 7'd6;
+    parameter ST_divzr    = 7'd6;
 
     // R instructions
 
-    parameter ST_add
+    parameter ST_add      = 7'd7;
+    parameter ST_sub      = 7'd8;
+    parameter ST_and      = 7'd9;
+
 
 // Opcodes Parameters
     // R instructions
@@ -296,7 +299,7 @@ always @(posedge clk) begin
                             end
 
                             FUNCT_AND:begin
-
+                                STATE = ST_and;
                             end
 
                             FUNCT_DIV:begin
@@ -344,7 +347,7 @@ always @(posedge clk) begin
                             end
 
                             FUNCT_SUB:begin
-                              
+                                STATE = ST_sub;
                             end
 
                             FUNCT_BREAK:begin

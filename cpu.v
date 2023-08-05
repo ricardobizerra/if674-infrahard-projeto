@@ -59,8 +59,6 @@ module cpu (
     wire less_than;
     wire DIV_on;
     wire MULT_on;
-    wire overflow;
-    wire dzero;
     wire div_srcA;
     wire div_srcB;
     wire shift_src;
@@ -480,8 +478,6 @@ module cpu (
       less_than,
       DIV_on,
       MULT_on,
-      overflow,
-      dzero,
       div_srcA,
       div_srcB,
       shift_src,
