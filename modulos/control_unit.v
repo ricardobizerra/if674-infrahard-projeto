@@ -27,8 +27,6 @@ module control_unit(
     output reg less_than,
     output reg DIV_on,
     output reg MULT_on,
-    output reg overflow,
-    output reg dzero,
     output reg div_srcA,
     output reg div_srcB,
     output reg shift_src,
@@ -62,22 +60,23 @@ module control_unit(
 // Main States Parameters
     // initial states
 
-    parameter ST_reset    = 7'd0;
-    parameter ST_fetch0   = 7'd1;
-    parameter ST_fetch1   = 7'd2;
-    parameter ST_decode   = 7'd3;
+    parameter ST_reset       = 7'd0;
+    parameter ST_fetch0      = 7'd1;
+    parameter ST_fetch1      = 7'd2;
+    parameter ST_decode      = 7'd3;
 
     // exceptions states
 
-    parameter ST_noopcode = 7'd4;
-    parameter ST_overflow = 7'd5;
-    parameter ST_divzr    = 7'd6;
+    parameter ST_noopcode    = 7'd4;
+    parameter ST_overflow    = 7'd5;
+    parameter ST_divzr       = 7'd6;
 
     // R instructions
 
-    parameter ST_add      = 7'd7;
-    parameter ST_sub      = 7'd8;
-    parameter ST_and      = 7'd9;
+    parameter ST_add         = 7'd7;
+    parameter ST_sub         = 7'd8;
+    parameter ST_and         = 7'd9;
+    parameter ST_BREG_write  = 7'd10;
 
 
 // Opcodes Parameters
@@ -128,6 +127,38 @@ initial begin
 end
 
 always @(posedge clk) begin
+    default:PC_write     = 1'b0;
+            branch       = 1'b0;
+            MEM_wr       = 1'b0;
+            IR_write     = 1'b0;
+            A_write      = 1'b0;
+            B_write      = 1'b0;
+            MDR_write    = 1'b0;
+            ALUReg_write = 1'b0;
+            EPC_write    = 1'b0;
+            Hi_write     = 1'b0;
+            Lo_write     = 1'b0;
+            REG_write    = 1'b0;
+            less_than    = 1'b0;
+            DIV_on       = 1'b0;
+            MULT_on      = 1'b0;
+            div_srcA     = 1'b0;
+            div_srcB     = 1'b0;
+            shift_src    = 1'b0;
+            Hi_src       = 1'b0;
+            Lo_src       = 1'b0;
+            reg_dst      = 2'b00; 
+            except       = 2'b00; 
+            MEM_toMDR    = 2'b00;
+            shift_src    = 2'b00;
+            BtoC         = 2'b00;
+            ALU_srcA     = 2'b00;
+            IorD         = 3'b000;
+            ALU_srcB     = 3'b000;
+            ALU_OP       = 3'b000;
+            PC_src       = 3'b000;
+            regOP        = 3'b000;
+            MEM_toreg    = 4'b0000;
     if (reset == 1'b1) begin
         STATE = ST_fetch0;
         // Setting ALL signals to zero
@@ -145,8 +176,6 @@ always @(posedge clk) begin
         less_than    = 1'b0;
         DIV_on       = 1'b0;
         MULT_on      = 1'b0;
-        overflow     = 1'b0;
-        dzero        = 1'b0;
         div_srcA     = 1'b0;
         div_srcB     = 1'b0;
         shift_src    = 1'b0;
@@ -172,7 +201,6 @@ always @(posedge clk) begin
     else begin
         case (STATE)
             ST_fetch0: begin
-                STATE = ST_fetch1;
                 PC_write     = 1'b0;
                 branch       = 1'b0;
                 MEM_wr       = 1'b0;
@@ -189,8 +217,6 @@ always @(posedge clk) begin
                 less_than    = 1'b0;
                 DIV_on       = 1'b0;
                 MULT_on      = 1'b0;
-                overflow     = 1'b0;
-                dzero        = 1'b0;
                 div_srcA     = 1'b0;
                 div_srcB     = 1'b0;
                 shift_src    = 1'b0;
@@ -209,6 +235,8 @@ always @(posedge clk) begin
                 regOP        = 3'b000;
                 MEM_toreg    = 4'b0000;
                 COUNTER = COUNTER + 1;
+                if (COUNTER == 7'b0000001):
+                    STATE = ST_fetch1;
             end
             ST_fetch1:begin
                 STATE = ST_decode;      
@@ -228,8 +256,6 @@ always @(posedge clk) begin
                 less_than    = 1'b0;
                 DIV_on       = 1'b0;
                 MULT_on      = 1'b0;
-                overflow     = 1'b0;
-                dzero        = 1'b0;
                 div_srcA     = 1'b0;
                 div_srcB     = 1'b0;
                 shift_src    = 1'b0;
@@ -266,8 +292,6 @@ always @(posedge clk) begin
                 less_than    = 1'b0;
                 DIV_on       = 1'b0;
                 MULT_on      = 1'b0;
-                overflow     = 1'b0;
-                dzero        = 1'b0;
                 div_srcA     = 1'b0;
                 div_srcB     = 1'b0;
                 shift_src    = 1'b0;
@@ -439,9 +463,54 @@ always @(posedge clk) begin
                 endcase
             end
             ST_add:begin
-                STATE = ;
+                STATE = ST_BREG_write;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b000;
+                ALU_OP = 3'b001;
+                ALUReg_write = 1'b1;
+            end
+
+            ST_and:begin
+                STATE = ST_BREG_write;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b000;
+                ALU_OP = 3'b010;
+                ALUReg_write = 1'b1;
+            end
+
+            ST_sub:begin
+                STATE = ST_BREG_write;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b000;
+                ALU_OP = 3'b011;
+                ALUReg_write = 1'b1;
+            end
+
+            ST_BREG_write:begin
+                if (OV) begin
+                    STATE = ST_overflow;
+                end
+                else begin
+                    STATE = ST_fetch0;
+                    REG_write = 1'b1;
+                    reg_dst = 2'b01;
+                    MEM_toreg = 4'b0000;
+                end
+            end
+
+            ST_overflow:begin
+                STATE = ST_except;
+                except = 2'b01;
+                IorD = 3'b010;
+                MEM_wr = 1'b0;
+                ALU_srcA = 2'b00;
+                ALU_srcB = 3'b001;
+                ALU_OP = 3'b010;
+            end
+
+            ST_except:begin
+                STATE = ST_fetch0;
             end
     end
 end
-    
 endmodule
