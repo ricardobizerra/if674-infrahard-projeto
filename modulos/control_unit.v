@@ -549,6 +549,8 @@ always @(posedge clk) begin
                     PC_src       = 3'b000;
                     regOP        = 3'b000;
                     MEM_toreg    = 4'b0000;
+            end
+    end
     end
 end
 endmodule
