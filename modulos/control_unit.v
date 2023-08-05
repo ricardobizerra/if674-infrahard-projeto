@@ -124,7 +124,7 @@ module control_unit(
 
 initial begin
     // Initial reset 
-    reset = 1'b1;
+    reset_out = 1'b1;
 end
 
 always @(posedge clk) begin
@@ -166,6 +166,7 @@ always @(posedge clk) begin
         reg_dst      = 2'b10; 
         REG_write    = 1'b1;
         MEM_toreg    = 4'b0100;
+        reset_out    = 1'b0;
     end 
     else begin
         case (STATE)
@@ -204,10 +205,12 @@ always @(posedge clk) begin
                 regOP        = 3'b000;
                 MEM_toreg    = 4'b0000;
                 COUNTER = COUNTER + 1;
-                if (COUNTER == 7'b0000010):
+                if (COUNTER == 7'b0000010) begin
                     STATE = ST_fetch1;
-                else:
+                end
+                else begin
                     STATE = ST_fetch0;
+                end
             end
             ST_fetch1:begin
                 STATE = ST_decode;      
@@ -282,160 +285,7 @@ always @(posedge clk) begin
                 MEM_toreg    = 4'b0000;
                 COUNTER = COUNTER + 1;
             end
-        endcase
-            // INSTRUCTIONS STATES
-            else if(COUNTER == 7'b0000011) begin
-                case(OPCODE)
-                    // R instructions
-                    R_OPCODE:begin
-                        case(FUNCT)
-                            FUNCT_ADD:begin
-                                STATE = ST_add;
-                                COUNTER = COUNTER + 1;
-                            end
 
-                            FUNCT_AND:begin
-                                STATE = ST_and;
-                                COUNTER = COUNTER + 1;
-                            end
-
-                            FUNCT_DIV:begin
-
-                            end
-
-                            FUNCT_MULT:begin
-                              
-                            end
-
-                            FUNCT_JR:begin
-
-                            end
-
-                            FUNCT_MFHI:begin
-                              
-                            end
-
-                            FUNCT_MFLO:begin
-                              
-                            end
-
-                            FUNCT_SLL:begin
-                              
-                            end
-
-                            FUNCT_SLLV:begin
-                              
-                            end
-
-                            FUNCT_SLT:begin
-                              
-                            end
-
-                            FUNCT_SRA:begin
-                              
-                            end
-
-                            FUNCT_SRAV:begin
-                              
-                            end
-
-                            FUNCT_SRL:begin
-                              
-                            end
-
-                            FUNCT_SUB:begin
-                                STATE = ST_sub;
-                                COUNTER = COUNTER + 1;
-                            end
-
-                            FUNCT_BREAK:begin
-                              
-                            end
-
-                            FUNCT_RTE:begin
-                              
-                            end
-
-                            FUNCT_DIVM:begin
-                              
-                            end
-                        endcase 
-                    end
-                    // I instructions 
-                    ADDI:begin
-                      
-                    end
-
-                    ADDIU:begin
-                      
-                    end
-
-                    BEQ:begin
-                      
-                    end
-
-                    BNE:begin
-                      
-                    end
-
-                    BLE:begin
-                      
-                    end
-
-                    BGT:begin
-                      
-                    end
-
-                    ADDM:begin
-                      
-                    end
-
-                    LB:begin
-                      
-                    end
-
-                    LH:begin
-                      
-                    end
-
-                    LUI:begin
-
-                    end
-
-                    LW:begin
-
-                    end
-
-                    SB:begin
-                      
-                    end
-
-                    SH:begin
-                      
-                    end
-
-                    SLTI:begin
-
-                    end
-
-                    SW:begin
-
-                    end
-
-                    // J instructions
-                    J:begin
-                      
-                    end
-
-                    JAL:begin
-
-                    end
-                    // NO OPCODE EXCEPTION
-                    default:begin
-                        STATE = ST_noopcode;
-                    end
-                endcase
-            end
             ST_add:begin
                 STATE = ST_BREG_write;
                 ALU_srcA = 2'b01;
@@ -485,10 +335,13 @@ always @(posedge clk) begin
                 ALU_srcB = 3'b001;
                 ALU_OP = 3'b010;
                 COUNTER = COUNTER + 1;
-                if (COUNTER == 7'b0001000):
+                if (COUNTER == 7'b0001000) begin
                     STATE = ST_except;
-                else:
+                end
+                else begin
                     STATE = ST_noopcode;
+                end
+            end
 
             ST_overflow:begin
                 except = 2'b01;
@@ -498,10 +351,13 @@ always @(posedge clk) begin
                 ALU_srcB = 3'b001;
                 ALU_OP = 3'b010;
                 COUNTER = COUNTER + 1;
-                if (COUNTER == 7'b0001000):
+                if (COUNTER == 7'b0001000) begin
                     STATE = ST_except;
-                else:
+                end
+                else begin
                     STATE = ST_overflow;
+                end
+            end
 
             ST_divzr:begin
                 except = 2'b10;
@@ -511,21 +367,24 @@ always @(posedge clk) begin
                 ALU_srcB = 3'b001;
                 ALU_OP = 3'b010;
                 COUNTER = COUNTER + 1;
-                if (COUNTER == 7'b0001000):
+                if (COUNTER == 7'b0001000) begin
                     STATE = ST_except;
-                else:
+                end
+                else begin
                     STATE = ST_divzr;
+                end
             end
 
             ST_except:begin
                 STATE = ST_fetch0;
                 EPC_write = 1'b1;
                 PC_src  = 3'b011;
-                PCWrite = 1'b1;
+                PC_write = 1'b1;
                 COUNTER = 7'b0000000;
             end
 
-            default:PC_write     = 1'b0;
+            default:begin
+                PC_write     = 1'b0;
                     branch       = 1'b0;
                     MEM_wr       = 1'b0;
                     IR_write     = 1'b0;
@@ -558,6 +417,159 @@ always @(posedge clk) begin
                     regOP        = 3'b000;
                     MEM_toreg    = 4'b0000;
             end
+        endcase
+        // INSTRUCTIONS STATES
+        if(COUNTER == 7'b0000011) begin
+            case(OPCODE)
+                // R instructions
+                R_OPCODE:begin
+                    case(FUNCT)
+                        FUNCT_ADD:begin
+                            STATE = ST_add;
+                            COUNTER = COUNTER + 1;
+                        end
+
+                        FUNCT_AND:begin
+                            STATE = ST_and;
+                            COUNTER = COUNTER + 1;
+                        end
+
+                        FUNCT_DIV:begin
+
+                        end
+
+                        FUNCT_MULT:begin
+                            
+                        end
+
+                        FUNCT_JR:begin
+
+                        end
+
+                        FUNCT_MFHI:begin
+                            
+                        end
+
+                        FUNCT_MFLO:begin
+                            
+                        end
+
+                        FUNCT_SLL:begin
+                            
+                        end
+
+                        FUNCT_SLLV:begin
+                            
+                        end
+
+                        FUNCT_SLT:begin
+                            
+                        end
+
+                        FUNCT_SRA:begin
+                            
+                        end
+
+                        FUNCT_SRAV:begin
+                            
+                        end
+
+                        FUNCT_SRL:begin
+                            
+                        end
+
+                        FUNCT_SUB:begin
+                            STATE = ST_sub;
+                            COUNTER = COUNTER + 1;
+                        end
+
+                        FUNCT_BREAK:begin
+                            
+                        end
+
+                        FUNCT_RTE:begin
+                            
+                        end
+
+                        FUNCT_DIVM:begin
+                            
+                        end
+                    endcase 
+                end
+                // I instructions 
+                ADDI:begin
+                    
+                end
+
+                ADDIU:begin
+                    
+                end
+
+                BEQ:begin
+                    
+                end
+
+                BNE:begin
+                    
+                end
+
+                BLE:begin
+                    
+                end
+
+                BGT:begin
+                    
+                end
+
+                ADDM:begin
+                    
+                end
+
+                LB:begin
+                    
+                end
+
+                LH:begin
+                    
+                end
+
+                LUI:begin
+
+                end
+
+                LW:begin
+
+                end
+
+                SB:begin
+                    
+                end
+
+                SH:begin
+                    
+                end
+
+                SLTI:begin
+
+                end
+
+                SW:begin
+
+                end
+
+                // J instructions
+                J:begin
+                    
+                end
+
+                JAL:begin
+
+                end
+                // NO OPCODE EXCEPTION
+                default:begin
+                    STATE = ST_noopcode;
+                end
+            endcase
         end
     end
 end
