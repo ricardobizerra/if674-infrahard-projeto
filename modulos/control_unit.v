@@ -206,6 +206,8 @@ always @(posedge clk) begin
                 COUNTER = COUNTER + 1;
                 if (COUNTER == 7'b0000010):
                     STATE = ST_fetch1;
+                else:
+                    STATE = ST_fetch0;
             end
             ST_fetch1:begin
                 STATE = ST_decode;      
@@ -485,6 +487,8 @@ always @(posedge clk) begin
                 COUNTER = COUNTER + 1;
                 if (COUNTER == 7'b0001000):
                     STATE = ST_except;
+                else:
+                    STATE = ST_noopcode;
 
             ST_overflow:begin
                 except = 2'b01;
@@ -496,6 +500,8 @@ always @(posedge clk) begin
                 COUNTER = COUNTER + 1;
                 if (COUNTER == 7'b0001000):
                     STATE = ST_except;
+                else:
+                    STATE = ST_overflow;
 
             ST_divzr:begin
                 except = 2'b10;
@@ -507,12 +513,14 @@ always @(posedge clk) begin
                 COUNTER = COUNTER + 1;
                 if (COUNTER == 7'b0001000):
                     STATE = ST_except;
+                else:
+                    STATE = ST_divzr;
             end
 
             ST_except:begin
                 STATE = ST_fetch0;
                 EPC_write = 1'b1;
-                PCSource  = 3'b011;
+                PC_src  = 3'b011;
                 PCWrite = 1'b1;
                 COUNTER = 7'b0000000;
             end
