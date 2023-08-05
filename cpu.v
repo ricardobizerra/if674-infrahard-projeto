@@ -70,7 +70,6 @@ module cpu (
     wire [1:0] reg_dst;
     wire [1:0] except;
     wire [1:0] MEM_toMDR;
-    wire [1:0] shift_src;
     wire [1:0] BtoC;
     wire [1:0] ALU_srcA;
 
@@ -118,7 +117,6 @@ module cpu (
     wire [31:0] SJ_out;
     wire [31:0] _out;
     wire [31:0] MDR_in;
-    wire [31:0] MDR_out;
     wire [31:0] ALUReg_out;
     wire [31:0] MDR_out;
     wire [31:0] Hi_in;
@@ -325,7 +323,8 @@ module cpu (
       SL16_out
     );
 
-    OFFSET = {RS,RT,IMMEDIATE}
+    assign OFFSET = {RS,RT,IMMEDIATE};
+
     shift_jump SJ(
       OFFSET,
       PC_out,
@@ -452,7 +451,7 @@ module cpu (
 
 // Unidade de Controle
 
-    FUNCT = IMMEDIATE[5:0];
+    assign FUNCT = IMMEDIATE[5:0];
     control_unit CTRL(
       clk,
       reset,
@@ -481,8 +480,8 @@ module cpu (
       div_srcA,
       div_srcB,
       shift_src,
-      Hi_src;
-      Lo_src;
+      Hi_src,
+      Lo_src,
       reg_dst,
       except,
       MEM_toMDR,
