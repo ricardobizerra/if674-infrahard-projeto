@@ -70,13 +70,14 @@ module control_unit(
     parameter ST_noopcode    = 7'd4;
     parameter ST_overflow    = 7'd5;
     parameter ST_divzr       = 7'd6;
+    parameter ST_except       = 7'd7;
 
     // R instructions
 
-    parameter ST_add         = 7'd7;
-    parameter ST_sub         = 7'd8;
-    parameter ST_and         = 7'd9;
-    parameter ST_BREG_write  = 7'd10;
+    parameter ST_add         = 7'd8;
+    parameter ST_sub         = 7'd9;
+    parameter ST_and         = 7'd10;
+    parameter ST_BREG_write  = 7'd11;
 
 
 // Opcodes Parameters
@@ -203,7 +204,7 @@ always @(posedge clk) begin
                 regOP        = 3'b000;
                 MEM_toreg    = 4'b0000;
                 COUNTER = COUNTER + 1;
-                if (COUNTER == 7'b0000001):
+                if (COUNTER == 7'b0000010):
                     STATE = ST_fetch1;
             end
             ST_fetch1:begin
@@ -288,10 +289,12 @@ always @(posedge clk) begin
                         case(FUNCT)
                             FUNCT_ADD:begin
                                 STATE = ST_add;
+                                COUNTER = COUNTER + 1;
                             end
 
                             FUNCT_AND:begin
                                 STATE = ST_and;
+                                COUNTER = COUNTER + 1;
                             end
 
                             FUNCT_DIV:begin
@@ -340,6 +343,7 @@ always @(posedge clk) begin
 
                             FUNCT_SUB:begin
                                 STATE = ST_sub;
+                                COUNTER = COUNTER + 1;
                             end
 
                             FUNCT_BREAK:begin
@@ -436,6 +440,7 @@ always @(posedge clk) begin
                 ALU_srcB = 3'b000;
                 ALU_OP = 3'b001;
                 ALUReg_write = 1'b1;
+                COUNTER = COUNTER + 1;
             end
 
             ST_and:begin
@@ -444,6 +449,7 @@ always @(posedge clk) begin
                 ALU_srcB = 3'b000;
                 ALU_OP = 3'b010;
                 ALUReg_write = 1'b1;
+                COUNTER = COUNTER + 1;
             end
 
             ST_sub:begin
@@ -452,66 +458,97 @@ always @(posedge clk) begin
                 ALU_srcB = 3'b000;
                 ALU_OP = 3'b011;
                 ALUReg_write = 1'b1;
+                COUNTER = COUNTER + 1;
             end
 
             ST_BREG_write:begin
                 if (OV) begin
                     STATE = ST_overflow;
+                    COUNTER = COUNTER + 1;
                 end
                 else begin
                     STATE = ST_fetch0;
                     REG_write = 1'b1;
                     reg_dst = 2'b01;
                     MEM_toreg = 4'b0000;
+                    COUNTER = 7'b0000000;
                 end
             end
 
+            ST_noopcode:begin
+                except = 2'b00;
+                IorD = 3'b010;
+                MEM_wr = 1'b0;
+                ALU_srcA = 2'b00;
+                ALU_srcB = 3'b001;
+                ALU_OP = 3'b010;
+                COUNTER = COUNTER + 1;
+                if (COUNTER == 7'b0001000):
+                    STATE = ST_except;
+
             ST_overflow:begin
-                STATE = ST_except;
                 except = 2'b01;
                 IorD = 3'b010;
                 MEM_wr = 1'b0;
                 ALU_srcA = 2'b00;
                 ALU_srcB = 3'b001;
                 ALU_OP = 3'b010;
+                COUNTER = COUNTER + 1;
+                if (COUNTER == 7'b0001000):
+                    STATE = ST_except;
+
+            ST_divzr:begin
+                except = 2'b10;
+                IorD = 3'b010;
+                MEM_wr = 1'b0;
+                ALU_srcA = 2'b00;
+                ALU_srcB = 3'b001;
+                ALU_OP = 3'b010;
+                COUNTER = COUNTER + 1;
+                if (COUNTER == 7'b0001000):
+                    STATE = ST_except;
             end
 
             ST_except:begin
                 STATE = ST_fetch0;
+                EPC_write = 1'b1;
+                PCSource  = 3'b011;
+                PCWrite = 1'b1;
+                COUNTER = 7'b0000000;
             end
 
             default:PC_write     = 1'b0;
-            branch       = 1'b0;
-            MEM_wr       = 1'b0;
-            IR_write     = 1'b0;
-            A_write      = 1'b0;
-            B_write      = 1'b0;
-            MDR_write    = 1'b0;
-            ALUReg_write = 1'b0;
-            EPC_write    = 1'b0;
-            Hi_write     = 1'b0;
-            Lo_write     = 1'b0;
-            REG_write    = 1'b0;
-            less_than    = 1'b0;
-            DIV_on       = 1'b0;
-            MULT_on      = 1'b0;
-            div_srcA     = 1'b0;
-            div_srcB     = 1'b0;
-            shift_src    = 1'b0;
-            Hi_src       = 1'b0;
-            Lo_src       = 1'b0;
-            reg_dst      = 2'b00; 
-            except       = 2'b00; 
-            MEM_toMDR    = 2'b00;
-            shift_src    = 2'b00;
-            BtoC         = 2'b00;
-            ALU_srcA     = 2'b00;
-            IorD         = 3'b000;
-            ALU_srcB     = 3'b000;
-            ALU_OP       = 3'b000;
-            PC_src       = 3'b000;
-            regOP        = 3'b000;
-            MEM_toreg    = 4'b0000;
+                    branch       = 1'b0;
+                    MEM_wr       = 1'b0;
+                    IR_write     = 1'b0;
+                    A_write      = 1'b0;
+                    B_write      = 1'b0;
+                    MDR_write    = 1'b0;
+                    ALUReg_write = 1'b0;
+                    EPC_write    = 1'b0;
+                    Hi_write     = 1'b0;
+                    Lo_write     = 1'b0;
+                    REG_write    = 1'b0;
+                    less_than    = 1'b0;
+                    DIV_on       = 1'b0;
+                    MULT_on      = 1'b0;
+                    div_srcA     = 1'b0;
+                    div_srcB     = 1'b0;
+                    shift_src    = 1'b0;
+                    Hi_src       = 1'b0;
+                    Lo_src       = 1'b0;
+                    reg_dst      = 2'b00; 
+                    except       = 2'b00; 
+                    MEM_toMDR    = 2'b00;
+                    shift_src    = 2'b00;
+                    BtoC         = 2'b00;
+                    ALU_srcA     = 2'b00;
+                    IorD         = 3'b000;
+                    ALU_srcB     = 3'b000;
+                    ALU_OP       = 3'b000;
+                    PC_src       = 3'b000;
+                    regOP        = 3'b000;
+                    MEM_toreg    = 4'b0000;
     end
 end
 endmodule
