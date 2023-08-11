@@ -360,22 +360,22 @@ always @(posedge clk) begin
                 end
             end
 
-            ST_MEM_to-MDR1: begin 
+            ST_MEM_to-MDR1: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b00;
             end
 
-            ST_MEM_to-MDR2: begin
+            ST_MEM_to-MDR2: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b01;
             end
 
-            ST_MEM_to-MDR3: begin
+            ST_MEM_to-MDR3: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b10;
             end
 
-            ST_REG_write: begin
+            ST_REG_write: begin //Escrevendo no banco de registradores.
                 STATE = ST_fetch0;
                 MEM_toreg = 4'b0001;
                 reg_dst = 2'b00;
