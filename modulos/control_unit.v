@@ -419,25 +419,32 @@ always @(posedge clk) begin
                 REG_write = 1;
             end
 
-            ST_store1: begin
+            ST_store1: begin //Armazenando na memoria.
                 STATE = ST_fetch0;
                 BtoC = 2'b00;
                 IorD = 3'b001;
                 MEM_wr = 1;
             end
 
-            ST_store2: begin
+            ST_store2: begin //Armazenando na memoria.
                 STATE = ST_fetch0;
                 BtoC = 2'b01;
                 IorD = 3'b001;
                 MEM_wr = 1;
             end
 
-            ST_store3: begin
+            ST_store3: begin //Armazenando na memoria.
                 STATE = ST_fetch0;
                 BtoC = 2'b10;
                 IorD = 3'b001;
                 MEM_wr = 1;
+            end
+
+            ST_jump: begin
+                STATE = ST_fetch0;
+                PC_write = 1;
+                branch = 1;
+                PC_src = 3'b010;
             end
 
             ST_BREG_write:begin
