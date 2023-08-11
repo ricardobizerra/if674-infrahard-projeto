@@ -732,12 +732,20 @@ always @(posedge clk) begin
 
                 // J instructions
                 J:begin
-                    
+                    STATE = ST_jump;
+                    COUNTER = COUNTER + 1;
                 end
 
                 JAL:begin
-
+                    STATE = ST_jal;
+                    COUNTER = COUNTER + 1;
                 end
+
+                 JR:begin
+                    STATE = ST_jr;
+                    COUNTER = COUNTER + 1;
+                end
+
                 // NO OPCODE EXCEPTION
                 default:begin
                     STATE = ST_noopcode;
