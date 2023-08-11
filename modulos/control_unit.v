@@ -79,19 +79,24 @@ module control_unit(
     parameter ST_sub         = 7'd9;
     parameter ST_and         = 7'd10;
     parameter ST_BREG_write  = 7'd11;
-    parameter ST_BREG_write2  = 7'd12;
-    parameter ST_lw = 7'16;
-    parameter ST_lh = 7'17;
-    parameter ST_lb = 7'18;
-    parameter ST_sw = 7'19;
-    parameter ST_sh = 7'20;
-    parameter ST_sb = 7'21;
-    parameter ST_lui = 7'22;
+    parameter ST_BREG_write2 = 7'd12;
+
 
     // I instructions
 
     parameter ST_addi        = 7'd13;
-    parameter ST_addiu        = 7'd14;
+    parameter ST_addiu       = 7'd14;
+    parameter ST_lw          = 7'd16;
+    parameter ST_lh          = 7'd17;
+    parameter ST_lb          = 7'd18;
+    parameter ST_sw          = 7'd19;
+    parameter ST_sh          = 7'd20;
+    parameter ST_sb          = 7'd21;
+    parameter ST_lui         = 7'd22;
+    parameter ST_beq         = 7'd23;
+    parameter ST_bne         = 7'd24;
+    parameter ST_ble         = 7'd25;
+    parameter ST_bgt         = 7'd26;
 
 
 // Opcodes Parameters
