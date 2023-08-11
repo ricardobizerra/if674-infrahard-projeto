@@ -333,96 +333,43 @@ always @(posedge clk) begin
                 COUNTER = COUNTER + 1;
             end
 
-            ST_lw: begin
-                STATE = ST_fetch0;
+            ST_load_adress: begin  //Estado para calcular o endereço do valor a ser carregado. 
+                STATE = ST_MEM_read;
+                ALU_srcA = 2'b01;
+                ALU_srcB 3'b010;
+                ALU_OP 3'b001;
+                COUNTER = COUNTER + 1;
+            end
+
+            ST_MEM_read: begin //Lendo o valor a ser carregado. 
+                IorD = 3'b001;
+                ST_MEM_read = 1;
+                MEM_wr = 0;
+                COUNTER = COUNTER + 1;
+                if (COUNTER == 7'd1) begin
+                    STATE = ST_MEM_read;
+                end
+                else begin
+                    if () begin
+                       STATE = ST_MEM_to-MDR1;
+                    end else if () begin
+                        STATE = ST_MEM_to-MDR2;
+                    end else begin
+                        STATE = ST_MEM_to-MDR3;
+                    end
+                end
+            end
+
+            ST_MEM_to-MDR1: begin
                 MEM_toMDR = 2'b00;
-                MEM_toreg = 4'b0001;
-                reg_dst = 2'b00;
-                REG_write = 1;
             end
 
-            ST_lh: begin
-                STATE = ST_fetch0;
+            ST_MEM_to-MDR2: begin
                 MEM_toMDR = 2'b01;
-                MEM_toreg = 4'b0001;
-                reg_dst = 2'b00;
-                REG_write = 1;
             end
 
-            ST_lb: begin
-                STATE = ST_fetch0;
+            ST_MEM_to-MDR3: begin
                 MEM_toMDR = 2'b10;
-                MEM_toreg = 4'b0001;
-                reg_dst = 2'b00;
-                REG_write = 1;
-            end
-
-            ST_sw: begin
-                STATE = ST_fetch0;
-                BtoC = 00;
-                IorD = 001;
-                MEM_wr = 1;
-            end
-
-             ST_sb: begin
-                STATE = ST_fetch0;
-                BtoC = 01;
-                IorD = 001;
-                MEM_wr = 1;
-            end
-
-            ST_sh: begin
-                STATE = ST_fetch0;
-                BtoC = 10;
-                IorD = 001;
-                MEM_wr = 1;
-            end
-
-            ST_lui: begin
-                STATE = ST_fetch0;
-                MEM_toreg = 1000;
-                reg_dst = 00;
-                REG_write = 1;
-            end
-
-            ST_beq: begin
-                STATE = ST_fetch0;
-                ALU_srcA = 01;
-                ALU_srcB = 000;
-                ALU_OP = 111;
-                branch = 1;
-                PC_src = 001;
-                PC_write = 0;
-            end
-
-            ST_bne: begin
-                STATE = ST_fetch0;
-                ALU_srcA = 01;
-                ALU_srcB = 000;
-                ALU_OP = 111;
-                branch = 1;
-                PC_src = 001;
-                PC_write = 0;
-            end
-
-            ST_ble: begin
-                STATE = ST_fetch0;
-                ALU_srcA = 01;
-                ALU_srcB = 000;
-                ALU_OP = 111;
-                branch = 1;
-                PC_src = 001;
-                PC_write = 0;
-            end
-
-            ST_bgt: begin
-                STATE = ST_fetch0;
-                ALU_srcA = 01;
-                ALU_srcB = 000;
-                ALU_OP = 111;
-                branch = 1;
-                PC_src = 001;
-                PC_write = 0;
             end
 
             ST_BREG_write:begin
