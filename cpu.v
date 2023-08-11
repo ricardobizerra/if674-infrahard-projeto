@@ -407,7 +407,7 @@ module cpu (
       B_out,
       MEM_out,
       BtoC,
-      C_out
+      combC_out
     );
 
 // Divider
