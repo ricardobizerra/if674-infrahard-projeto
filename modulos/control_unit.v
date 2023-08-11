@@ -387,6 +387,12 @@ always @(posedge clk) begin
                         STATE = ST_MEM_to-MDR2;
                     end else if (OPCODE == 6'b100000) begin
                         STATE = ST_MEM_to-MDR3;
+                    end else if (OPCODE == 6'b101011) begin
+                        STATE = ST_store1;
+                    end else if (OPCODE == 6'b101001) begin
+                        STATE = ST_store2;
+                    end else if (OPCODE == 6'b101000) begin
+                        STATE = ST-ST_store3;
                     end
                 end
             end
@@ -411,6 +417,27 @@ always @(posedge clk) begin
                 MEM_toreg = 4'b0001;
                 reg_dst = 2'b00;
                 REG_write = 1;
+            end
+
+            ST_store1: begin
+                STATE = ST_fetch0;
+                BtoC = 2'b00;
+                IorD = 3'b001;
+                MEM_wr = 1;
+            end
+
+            ST_store2: begin
+                STATE = ST_fetch0;
+                BtoC = 2'b01;
+                IorD = 3'b001;
+                MEM_wr = 1;
+            end
+
+            ST_store3: begin
+                STATE = ST_fetch0;
+                BtoC = 2'b10;
+                IorD = 3'b001;
+                MEM_wr = 1;
             end
 
             ST_BREG_write:begin
