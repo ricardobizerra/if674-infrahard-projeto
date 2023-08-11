@@ -334,7 +334,22 @@ always @(posedge clk) begin
                 MEM_toreg = 4'b0001;
                 reg_dst = 2'b00;
                 REG_write = 1;
+            end
 
+            ST_lh: begin
+                STATE = ST_fetch0;
+                MEM_toMDR = 2'b01;
+                MEM_toreg = 4'b0001;
+                reg_dst = 2'b00;
+                REG_write = 1;
+            end
+
+            ST_lb: begin
+                STATE = ST_fetch0;
+                MEM_toMDR = 2'b10;
+                MEM_toreg = 4'b0001;
+                reg_dst = 2'b00;
+                REG_write = 1;
             end
 
             ST_BREG_write:begin
