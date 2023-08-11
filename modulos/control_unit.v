@@ -381,11 +381,11 @@ always @(posedge clk) begin
                     STATE = ST_MEM_read;
                 end
                 else begin
-                    if () begin
+                    if (OPCODE == 6'b100011) begin
                        STATE = ST_MEM_to-MDR1;
-                    end else if () begin
+                    end else if (OPCODE == 6'b100001) begin
                         STATE = ST_MEM_to-MDR2;
-                    end else begin
+                    end else if (OPCODE == 6'b100000) begin
                         STATE = ST_MEM_to-MDR3;
                     end
                 end
