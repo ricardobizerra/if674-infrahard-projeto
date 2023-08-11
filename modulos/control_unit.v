@@ -380,6 +380,46 @@ always @(posedge clk) begin
                 REG_write = 1;
             end
 
+            ST_beq: begin
+                STATE = ST_fetch0;
+                ALU_srcA = 01;
+                ALU_srcB = 000;
+                ALU_OP = 111;
+                branch = 1;
+                PC_src = 001;
+                PC_write = 0;
+            end
+
+            ST_bne: begin
+                STATE = ST_fetch0;
+                ALU_srcA = 01;
+                ALU_srcB = 000;
+                ALU_OP = 111;
+                branch = 1;
+                PC_src = 001;
+                PC_write = 0;
+            end
+
+            ST_ble: begin
+                STATE = ST_fetch0;
+                ALU_srcA = 01;
+                ALU_srcB = 000;
+                ALU_OP = 111;
+                branch = 1;
+                PC_src = 001;
+                PC_write = 0;
+            end
+
+            ST_bgt: begin
+                STATE = ST_fetch0;
+                ALU_srcA = 01;
+                ALU_srcB = 000;
+                ALU_OP = 111;
+                branch = 1;
+                PC_src = 001;
+                PC_write = 0;
+            end
+
             ST_BREG_write:begin
                 if (OV) begin
                     STATE = ST_overflow;
