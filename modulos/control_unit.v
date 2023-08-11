@@ -329,7 +329,12 @@ always @(posedge clk) begin
             end
 
             ST_lw: begin
-                
+                STATE = ST_fetch0;
+                MEM_toMDR = 2'b00;
+                MEM_toreg = 4'b0001;
+                reg_dst = 2'b00;
+                REG_write = 1;
+
             end
 
             ST_BREG_write:begin
