@@ -103,6 +103,7 @@ module control_unit(
     parameter ST_MEM_to_MDR1 = 7'd30;  
     parameter ST_MEM_to_MDR2 = 7'd31;  
     parameter ST_MEM_to_MDR3 = 7'd32;  
+    parameter ST_REG_write   = 7'd33;  
 
 
 // Opcodes Parameters
@@ -367,14 +368,13 @@ always @(posedge clk) begin
             ST_load_adress: begin  //Estado para calcular o endereço do valor a ser carregado. 
                 STATE = ST_MEM_read;
                 ALU_srcA = 2'b01;
-                ALU_srcB 3'b010;
-                ALU_OP 3'b001;
-                COUNTER = COUNTER + 1;
+                ALU_srcB = 3'b010;
+                ALU_OP   = 3'b001;
+                COUNTER  = COUNTER + 1;
             end
 
             ST_MEM_read: begin //Lendo o valor a ser carregado. 
                 IorD = 3'b001;
-                ST_MEM_read = 1;
                 MEM_wr = 0;
                 COUNTER = COUNTER + 1;
                 if (COUNTER == 7'd1) begin
@@ -382,26 +382,26 @@ always @(posedge clk) begin
                 end
                 else begin
                     if (OPCODE == 6'b100011) begin
-                       STATE = ST_MEM_to-MDR1;
+                       STATE = ST_MEM_to_MDR1;
                     end else if (OPCODE == 6'b100001) begin
-                        STATE = ST_MEM_to-MDR2;
+                        STATE = ST_MEM_to_MDR2;
                     end else if (OPCODE == 6'b100000) begin
-                        STATE = ST_MEM_to-MDR3;
+                        STATE = ST_MEM_to_MDR3;
                     end
                 end
             end
 
-            ST_MEM_to-MDR1: begin //selecionando o valor que irá entra na registrador temporário.
+            ST_MEM_to_MDR1: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b00;
             end
 
-            ST_MEM_to-MDR2: begin //selecionando o valor que irá entra na registrador temporário.
+            ST_MEM_to_MDR2: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b01;
             end
 
-            ST_MEM_to-MDR3: begin //selecionando o valor que irá entra na registrador temporário.
+            ST_MEM_to_MDR3: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b10;
             end
