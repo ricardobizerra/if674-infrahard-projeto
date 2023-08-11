@@ -80,6 +80,13 @@ module control_unit(
     parameter ST_and         = 7'd10;
     parameter ST_BREG_write  = 7'd11;
     parameter ST_BREG_write2  = 7'd12;
+    parameter ST_lw = 7'16;
+    parameter ST_lh = 7'17;
+    parameter ST_lb = 7'18;
+    parameter ST_sw = 7'19;
+    parameter ST_sh = 7'20;
+    parameter ST_sb = 7'21;
+    parameter ST_lui = 7'22;
 
     // I instructions
 
@@ -319,6 +326,10 @@ always @(posedge clk) begin
                 ALU_OP = 3'b011;
                 ALUReg_write = 1'b1;
                 COUNTER = COUNTER + 1;
+            end
+
+            ST_lw: begin
+                
             end
 
             ST_BREG_write:begin
@@ -569,27 +580,33 @@ always @(posedge clk) begin
                 end
 
                 LB:begin
-                    
+                   STATE = ST_lb;
+                   COUNTER = COUNTER + 1; 
                 end
 
                 LH:begin
-                    
+                    STATE = ST_lh;
+                    COUNTER = COUNTER + 1;
                 end
 
                 LUI:begin
-
+                    STATE = ST_lui;
+                    COUNTER = COUNTER + 1;
                 end
 
                 LW:begin
-
+                    STATE = ST_lw;
+                    COUNTER = COUNTER + 1;
                 end
 
                 SB:begin
-                    
+                    STATE = ST_sb;
+                    COUNTER = COUNTER + 1;
                 end
 
                 SH:begin
-                    
+                    STATE = ST_sh;
+                    COUNTER = COUNTER + 1;
                 end
 
                 SLTI:begin
@@ -597,7 +614,8 @@ always @(posedge clk) begin
                 end
 
                 SW:begin
-
+                    STATE = ST_sw;
+                    COUNTER = COUNTER + 1;
                 end
 
                 // J instructions
