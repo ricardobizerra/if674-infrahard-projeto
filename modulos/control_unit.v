@@ -352,6 +352,34 @@ always @(posedge clk) begin
                 REG_write = 1;
             end
 
+            ST_sw: begin
+                STATE = ST_fetch0;
+                BtoC = 00;
+                IorD = 001;
+                MEM_wr = 1;
+            end
+
+             ST_sb: begin
+                STATE = ST_fetch0;
+                BtoC = 01;
+                IorD = 001;
+                MEM_wr = 1;
+            end
+
+            ST_sh: begin
+                STATE = ST_fetch0;
+                BtoC = 10;
+                IorD = 001;
+                MEM_wr = 1;
+            end
+
+            ST_lui: begin
+                STATE = ST_fetch0;
+                MEM_toreg = 1000;
+                reg_dst = 00;
+                REG_write = 1;
+            end
+
             ST_BREG_write:begin
                 if (OV) begin
                     STATE = ST_overflow;
