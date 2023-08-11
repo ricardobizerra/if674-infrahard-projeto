@@ -447,6 +447,31 @@ always @(posedge clk) begin
                 PC_src = 3'b010;
             end
 
+            ST_jal: begin //calculando endereço 
+                STATE = ;
+               ALU_srcA = 2'b00;
+               ALU_OP = 3'b000; 
+            end
+
+            ST_adress_store: begin //armazenando endereço 
+                STATE = ST_fetch0;
+                MEM_toreg = 4'b0000;
+                reg_dst = 2'b11;
+                REG_write = 1;
+                PC_src = 3'b010;
+                PC_write = 1;
+                branch = 1;
+            end
+
+            ST_jr: begin
+                STATE = ST_fetch0;
+                ALU_srcA = 2'b01;
+                ALU_OP = 3'b000;
+                PC_src = 3'b000;
+                branch = 1;
+                PC_write = 1;
+            end
+
             ST_BREG_write:begin
                 if (OV) begin
                     STATE = ST_overflow;
