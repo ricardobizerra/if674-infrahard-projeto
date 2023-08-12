@@ -120,6 +120,8 @@ module control_unit(
     parameter ST_jal = 7'd38;
     parameter ST_adress_store = 7'd39;
     parameter  ST_jr = 7'd40;
+    parameter ST_addm = 7'd49;
+    parameter ST_addm2 = 7'd50;
 
 
 // Opcodes Parameters
@@ -380,6 +382,24 @@ always @(posedge clk) begin
                 COUNTER = COUNTER + 1;
             end
 
+            ST_addm:begin
+                STATE = ST_MEM_read;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b010;
+                ALU_OP = 3'b001;
+                ALUReg_write = 1'b1;
+                COUNTER = 7'd0;
+            end 
+
+            ST_addm2:begin
+                STATE = ST_BREG_write2;
+                ALU_srcA = 2'b10;
+                ALU_srcB = 3'b000;
+                ALU_OP = 3'b001;
+                ALUReg_write = 1'b1;
+                COUNTER = 7'b0000110;
+            end
+
             ST_load_adress: begin  //Estado para calcular o endereço do valor a ser carregado. 
                 STATE = ST_MEM_read;
                 ALU_srcA = 2'b01;
@@ -408,6 +428,8 @@ always @(posedge clk) begin
                         STATE = ST_store2;
                     end else if (OPCODE == 6'b101000) begin
                         STATE = ST_store3;
+                    end else if (OPCODE == ADDM) begin
+                        STATE = ST_addm2;
                     end
                 end
             end
@@ -432,6 +454,7 @@ always @(posedge clk) begin
                 MEM_toreg = 4'b0001;
                 reg_dst = 2'b00;
                 REG_write = 1;
+                COUNTER = 7'd0;
             end
 
             ST_store1: begin //Armazenando na memoria.
@@ -439,6 +462,7 @@ always @(posedge clk) begin
                 BtoC = 2'b00;
                 IorD = 3'b001;
                 MEM_wr = 1;
+                COUNTER = 7'd0;
             end
 
             ST_store2: begin //Armazenando na memoria.
@@ -446,6 +470,7 @@ always @(posedge clk) begin
                 BtoC = 2'b01;
                 IorD = 3'b001;
                 MEM_wr = 1;
+                COUNTER = 7'd0;
             end
 
             ST_store3: begin //Armazenando na memoria.
@@ -453,6 +478,7 @@ always @(posedge clk) begin
                 BtoC = 2'b10;
                 IorD = 3'b001;
                 MEM_wr = 1;
+                COUNTER = 7'd0;
             end
 
             ST_jump: begin
@@ -460,12 +486,14 @@ always @(posedge clk) begin
                 PC_write = 1;
                 branch = 1;
                 PC_src = 3'b010;
+                COUNTER = 7'd0;
             end
 
             ST_jal: begin //calculando endereço 
                 STATE = ST_adress_store;
                ALU_srcA = 2'b00;
                ALU_OP = 3'b000; 
+               COUNTER = COUNTER + 1;
             end
 
             ST_adress_store: begin //armazenando endereço 
@@ -476,6 +504,7 @@ always @(posedge clk) begin
                 PC_src = 3'b010;
                 PC_write = 1;
                 branch = 1;
+                COUNTER = 7'd0;
             end
 
             ST_jr: begin
@@ -485,6 +514,7 @@ always @(posedge clk) begin
                 PC_src = 3'b000;
                 branch = 1;
                 PC_write = 1;
+                COUNTER = 7'd0;
             end
 
             ST_BREG_write:begin
@@ -789,7 +819,8 @@ always @(posedge clk) begin
                 end
 
                 ADDM:begin
-                    
+                    STATE = ST_addm;
+                    COUNTER = COUNTER + 1;
                 end
 
                 LB:begin
