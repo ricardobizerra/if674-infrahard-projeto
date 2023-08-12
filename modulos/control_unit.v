@@ -386,13 +386,19 @@ always @(posedge clk) begin
                 if (COUNTER == 7'd1) begin
                     STATE = ST_MEM_read;
                 end
-                else begin
+                    else begin
                     if (OPCODE == 6'b100011) begin
-                       STATE = ST_MEM_to_MDR1;
+                       STATE = ST_MEM_to-MDR1;
                     end else if (OPCODE == 6'b100001) begin
-                        STATE = ST_MEM_to_MDR2;
+                        STATE = ST_MEM_to-MDR2;
                     end else if (OPCODE == 6'b100000) begin
-                        STATE = ST_MEM_to_MDR3;
+                        STATE = ST_MEM_to-MDR3;
+                    end else if (OPCODE == 6'b101011) begin
+                        STATE = ST_store1;
+                    end else if (OPCODE == 6'b101001) begin
+                        STATE = ST_store2;
+                    end else if (OPCODE == 6'b101000) begin
+                        STATE = ST-ST_store3;
                     end
                 end
             end
