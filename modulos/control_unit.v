@@ -82,6 +82,8 @@ module control_unit(
     parameter ST_BREG_write  = 7'd11;
     parameter ST_BREG_write2 = 7'd12;
     parameter ST_BREG_write3 = 7'd34;
+    parameter ST_BREG_write4 = 7'd52;
+    parameter ST_BREG_write5 = 7'd53;
     parameter ST_SLT         = 7'd41;
     parameter ST_SLTI        = 7'd42;
     parameter ST_SLL_SLLV    = 7'd43;
@@ -121,7 +123,7 @@ module control_unit(
     parameter  ST_jr         = 7'd40;
     parameter ST_addm = 7'd49;
     parameter ST_addm2 = 7'd50;
-
+    parameter ST_addm3 = 7'd51; 
 
 // Opcodes Parameters
     // R instructions
@@ -386,17 +388,21 @@ always @(posedge clk) begin
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b010;
                 ALU_OP = 3'b001;
-                ALUReg_write = 1'b1;
-                COUNTER = 7'd0;
+                COUNTER = 7'd1;
             end 
 
             ST_addm2:begin
+                STATE = ST_addm3;
+                MEM_toMDR = 2'b00;
+                COUNTER = COUNTER + 1;
+            end
+
+            ST_addm3:begin
                 STATE = ST_BREG_write2;
                 ALU_srcA = 2'b10;
                 ALU_srcB = 3'b000;
                 ALU_OP = 3'b001;
-                ALUReg_write = 1'b1;
-                COUNTER = 7'b0000110;
+                COUNTER = 7'd6;
             end
 
             ST_load_adress: begin  //Estado para calcular o endereço do valor a ser carregado. 
@@ -609,45 +615,15 @@ always @(posedge clk) begin
             end
 
             ST_SLT:begin
-                ALU_srcA = 2'b00;
+                STATE = ST_BREG_write4;
+                ALU_srcA = 2'b01;
                 ALU_srcB = 3'b000;
-                ALU_OP = 3'b111;
-
-                if (LT == 1) begin
-                    STATE = ST_fetch0;
-                    MEM_toreg = 4'b0110;
-                    reg_dst = 2'b01;
-                    REG_write = 1'b1;
-                end
-                else begin
-                    STATE = ST_fetch0;
-                    MEM_toreg = 4'b0101;
-                    reg_dst = 2'b01;
-                    REG_write = 1'b1;
-                end
-
-                COUNTER = 0;
             end
 
             ST_SLTI:begin
+                STATE = ST_BREG_write5;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b010;
-                ALU_OP = 3'b111;
-
-                if (LT == 1) begin
-                    STATE = ST_fetch0;
-                    MEM_toreg = 4'b0110;
-                    reg_dst = 2'b00;
-                    REG_write = 1'b1;
-                end
-                else begin
-                    STATE = ST_fetch0;
-                    MEM_toreg = 4'b0101;
-                    reg_dst = 2'b00;
-                    REG_write = 1'b1;
-                end
-
-                COUNTER = 0;
             end
 
             ST_ShiftImmediate:begin
@@ -693,6 +669,44 @@ always @(posedge clk) begin
                 REG_write = 1'b1;
                 MEM_toreg = 4'b0000;
                 reg_dst = 2'b00;  
+            end
+
+            ST_BREG_write4:begin
+                if (LT == 1) begin
+                    STATE = ST_fetch0;
+                    ALU_OP = 3'b111;
+                    MEM_toreg = 4'b0110;
+                    reg_dst = 2'b01;
+                    REG_write = 1'b1;
+                end
+                else begin
+                    STATE = ST_fetch0;
+                    ALU_OP = 3'b111;
+                    MEM_toreg = 4'b0101;
+                    reg_dst = 2'b01;
+                    REG_write = 1'b1;
+                end
+
+                COUNTER = 0; 
+            end
+
+            ST_BREG_write5:begin
+                if (LT == 1) begin
+                    STATE = ST_fetch0;
+                    ALU_OP = 3'b111;
+                    MEM_toreg = 4'b0110;
+                    reg_dst = 2'b00;
+                    REG_write = 1'b1;
+                end
+                else begin
+                    STATE = ST_fetch0;
+                    ALU_OP = 3'b111;
+                    MEM_toreg = 4'b0101;
+                    reg_dst = 2'b00;
+                    REG_write = 1'b1;
+                end
+
+                COUNTER = 0;
             end
 
             ST_Rte:begin
