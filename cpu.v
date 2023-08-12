@@ -411,12 +411,12 @@ module cpu (
 
 // Divider
 
-    divider DIV(
+    divider DIV( // configuração sem o divm
       clk,
       reset,
       DIV_on,
-      //
-      //
+      A_out,
+      B_out,
       Dzero,
       DIV_min,
       DIV_max
