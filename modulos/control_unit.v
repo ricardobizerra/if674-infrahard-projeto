@@ -151,7 +151,6 @@ module control_unit(
     parameter SH     = 6'h29;
     parameter SLTI   = 6'ha;
     parameter SW     = 6'h2b;
-    parameter JR     = 6'h29;
 
     // J instructions
     parameter J = 6'h2; 
@@ -617,7 +616,8 @@ always @(posedge clk) begin
                         end
 
                         FUNCT_JR:begin
-
+                            STATE = ST_jr;
+                            COUNTER = COUNTER + 1;
                         end
 
                         FUNCT_MFHI:begin
@@ -748,11 +748,6 @@ always @(posedge clk) begin
 
                 JAL:begin
                     STATE = ST_jal;
-                    COUNTER = COUNTER + 1;
-                end
-
-                JR:begin
-                    STATE = ST_jr;
                     COUNTER = COUNTER + 1;
                 end
 
