@@ -92,7 +92,6 @@ module cpu (
     wire [31:0] PC_out;
     wire [31:0] MEM_address;
     wire [31:0] MEM_out;
-    wire [31:0] combC_out;
     wire [31:0] BREG_to_A;
     wire [31:0] BREG_to_B;
     wire [31:0] BREG_write_data;
@@ -345,7 +344,7 @@ module cpu (
       MEM_address,
       clk,
       MEM_wr,
-      combC_out,
+      C_out,
       MEM_out
     );
 
@@ -407,7 +406,7 @@ module cpu (
       B_out,
       MEM_out,
       BtoC,
-      combC_out
+      C_out
     );
 
 // Divider
