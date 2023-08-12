@@ -90,7 +90,7 @@ module control_unit(
     parameter ST_ShiftS      = 7'd46;
     parameter ST_ShiftImmediate = 7'd47;
     parameter ST_ShiftVariable  = 7'd48;
-    parameter ST_Rte         = 7'd41;
+    parameter ST_Rte         = 7'd49;
 
 
     // I instructions
