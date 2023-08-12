@@ -80,6 +80,7 @@ module control_unit(
     parameter ST_and         = 7'd10;
     parameter ST_BREG_write  = 7'd11;
     parameter ST_BREG_write2 = 7'd12;
+    parameter ST_BREG_write3 = 7'd34;
 
 
     // I instructions
@@ -112,6 +113,7 @@ module control_unit(
     parameter ST_adress_store = 7'd39;
     parameter  ST_jr = 7'd40;
 
+    parameter ST_REG_write   = 7'd33;  
 
 
 // Opcodes Parameters
@@ -167,28 +169,27 @@ always @(posedge clk) begin
     MDR_write    = 1'b0;
     ALUReg_write = 1'b0;
     EPC_write    = 1'b0;
+    REG_write    = 1'b0;
     Hi_write     = 1'b0;
     Lo_write     = 1'b0;
     less_than    = 1'b0;
+    shift_src    = 1'b0;
     DIV_on       = 1'b0;
     MULT_on      = 1'b0;
     div_srcA     = 1'b0;
     div_srcB     = 1'b0;
-    shift_src    = 1'b0;
     Hi_src       = 1'b0;
     Lo_src       = 1'b0;
     except       = 2'b00; 
     MEM_toMDR    = 2'b00;
-    shift_src    = 2'b00;
     BtoC         = 2'b00;
     ALU_srcA     = 2'b00;
+    reg_dst      = 2'b00; 
     IorD         = 3'b000;
     ALU_srcB     = 3'b000;
     ALU_OP       = 3'b000;
     PC_src       = 3'b000;
     regOP        = 3'b000;
-    reg_dst      = 2'b00; 
-    REG_write    = 1'b0;
     MEM_toreg    = 4'b0000;
     if (reset == 1'b1) begin
         STATE = ST_fetch0;
@@ -214,7 +215,6 @@ always @(posedge clk) begin
         Lo_src       = 1'b0;
         except       = 2'b00; 
         MEM_toMDR    = 2'b00;
-        shift_src    = 2'b00;
         BtoC         = 2'b00;
         ALU_srcA     = 2'b00;
         IorD         = 3'b000;
@@ -266,14 +266,14 @@ always @(posedge clk) begin
                 regOP        = 3'b000;
                 MEM_toreg    = 4'b0000;
                 COUNTER = COUNTER + 1;
-                if (COUNTER == 7'd2) begin
+                if (COUNTER == 7'd2) begin  
                     STATE = ST_fetch1;
                 end
                 else begin
                     STATE = ST_fetch0;
                 end
             end
-            ST_fetch1:begin
+            ST_fetch1:begin // COUNTER = 3
                 STATE = ST_decode;      
                 PC_write     = 1'b1;    ///
                 branch       = 1'b0;
@@ -309,7 +309,7 @@ always @(posedge clk) begin
                 MEM_toreg    = 4'b0000;
                 COUNTER      = COUNTER + 1;
             end
-            ST_decode:begin     
+            ST_decode:begin   // COUNTER = 4  
                 STATE        = ST_decode2;   
                 PC_write     = 1'b0;
                 branch       = 1'b0;
@@ -359,7 +359,7 @@ always @(posedge clk) begin
                 STATE = ST_BREG_write;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b000;
-                ALU_OP = 3'b010;
+                ALU_OP = 3'b011;
                 ALUReg_write = 1'b1;
                 COUNTER = COUNTER + 1;
             end
@@ -368,7 +368,7 @@ always @(posedge clk) begin
                 STATE = ST_BREG_write;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b000;
-                ALU_OP = 3'b011;
+                ALU_OP = 3'b010;
                 ALUReg_write = 1'b1;
                 COUNTER = COUNTER + 1;
             end
@@ -377,13 +377,12 @@ always @(posedge clk) begin
                 STATE = ST_MEM_read;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b010;
-                ALU_OP = 3'b001;
-                COUNTER = COUNTER + 1;
+                ALU_OP   = 3'b001;
+                COUNTER  = COUNTER + 1;
             end
 
             ST_MEM_read: begin //Lendo o valor a ser carregado. 
                 IorD = 3'b001;
-                ST_MEM_read = 1;
                 MEM_wr = 0;
                 COUNTER = COUNTER + 1;
                 if (COUNTER == 7'd1) begin
@@ -391,17 +390,11 @@ always @(posedge clk) begin
                 end
                 else begin
                     if (OPCODE == 6'b100011) begin
-                       STATE = ST_MEM_to-MDR1;
+                       STATE = ST_MEM_to_MDR1;
                     end else if (OPCODE == 6'b100001) begin
-                        STATE = ST_MEM_to-MDR2;
+                        STATE = ST_MEM_to_MDR2;
                     end else if (OPCODE == 6'b100000) begin
-                        STATE = ST_MEM_to-MDR3;
-                    end else if (OPCODE == 6'b101011) begin
-                        STATE = ST_store1;
-                    end else if (OPCODE == 6'b101001) begin
-                        STATE = ST_store2;
-                    end else if (OPCODE == 6'b101000) begin
-                        STATE = ST-ST_store3;
+                        STATE = ST_MEM_to_MDR3;
                     end
                 end
             end
@@ -492,7 +485,6 @@ always @(posedge clk) begin
                     REG_write = 1'b1;
                     reg_dst = 2'b01;
                     MEM_toreg = 4'b0000;
-                    COUNTER = 7'b0000000;
                 end
             end
 
@@ -502,18 +494,20 @@ always @(posedge clk) begin
                     COUNTER = COUNTER + 1;
                 end
                 else begin
-                    if (COUNTER == 7'b0000111) begin
                         STATE = ST_fetch0;
                         COUNTER = 7'b0000000;
-                        REG_write = 1'b0;
-                    end
-                    else begin
-                        COUNTER = COUNTER + 1;
                         REG_write = 1'b1;
                         MEM_toreg = 4'b0000;
                         reg_dst = 2'b00;
                     end
-                end
+            end
+
+            ST_BREG_write3:begin
+                STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
+                REG_write = 1'b1;
+                MEM_toreg = 4'b0000;
+                reg_dst = 2'b00;  
             end
 
             ST_noopcode:begin
@@ -582,7 +576,7 @@ always @(posedge clk) begin
             end
 
             ST_addiu:begin
-                STATE = ST_BREG_write2;
+                STATE = ST_BREG_write3;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b010;
                 ALU_OP = 3'b001;
