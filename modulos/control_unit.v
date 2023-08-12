@@ -481,6 +481,11 @@ always @(posedge clk) begin
                 PC_write = 1;
             end
 
+            ST_beq: begin
+                STATE = ST_fetch0;
+                
+            end
+
             ST_BREG_write:begin
                 if (OV) begin
                     STATE = ST_overflow;
