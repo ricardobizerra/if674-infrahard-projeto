@@ -492,7 +492,8 @@ always @(posedge clk) begin
             ST_jal: begin //calculando endereço 
                 STATE = ST_adress_store;
                ALU_srcA = 2'b00;
-               ALU_OP = 3'b000; 
+               ALU_OP = 3'b000;
+               ALUReg_write = 1'b1;
                COUNTER = COUNTER + 1;
             end
 
