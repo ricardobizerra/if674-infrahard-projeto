@@ -316,7 +316,32 @@ always @(posedge clk) begin
                         STATE = ST_ShiftVariable
                         SHIFT_MODE = ST_SRL
                     end
+
+                    FUNCT_SLT: begin
+                        STATE = ST_SLT
+                    end
                 endcase
+            end
+
+            ST_SLT:begin
+                ALU_srcA = 2'b00
+                ALU_srcB = 3'b000
+                ALU_OP = 3'b111
+
+                if (LT == 1) begin
+                    STATE = ST_fetch0
+                    MEM_toreg = 4'b0110
+                    reg_dst = 2'b01
+                    REG_write = 1'b1
+                end
+                else begin
+                    STATE = ST_fetch0
+                    MEM_toreg = 4'b0101
+                    reg_dst = 2'b00
+                    REG_write = 1'b1
+                end
+
+                COUNTER = 0
             end
 
             ST_ShiftImmediate:begin
@@ -349,10 +374,11 @@ always @(posedge clk) begin
             end
 
             ST_ShiftS:begin
-                STATE = ST_fetch1
+                STATE = ST_fetch0
                 MEM_toreg = 4'b0111
                 reg_dst = 2'b01
                 REG_write = 1'b1
+                COUNTER = 0
             end
         endcase
     end
