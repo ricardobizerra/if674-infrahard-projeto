@@ -90,36 +90,35 @@ module control_unit(
     parameter ST_ShiftS      = 7'd46;
     parameter ST_ShiftImmediate = 7'd47;
     parameter ST_ShiftVariable  = 7'd48;
+    parameter ST_Rte         = 7'd41;
+
 
     // I instructions
 
     parameter ST_addi        = 7'd13;
     parameter ST_addiu       = 7'd14;
-    parameter ST_lw          = 7'd16;
-    parameter ST_lh          = 7'd17;
-    parameter ST_lb          = 7'd18;
-    parameter ST_sw          = 7'd19;
-    parameter ST_sh          = 7'd20;
-    parameter ST_sb          = 7'd21;
     parameter ST_lui         = 7'd22;
     parameter ST_beq         = 7'd23;
     parameter ST_bne         = 7'd24;
     parameter ST_ble         = 7'd25;
     parameter ST_bgt         = 7'd26; 
     parameter ST_load_adress = 7'd27; 
-    parameter ST_MEM_read    = 7'd28; 
+    parameter ST_MEM_read    = 7'd28;
     parameter ST_MEM_to      = 7'd29;  
     parameter ST_MEM_to_MDR1 = 7'd30;  
     parameter ST_MEM_to_MDR2 = 7'd31;  
     parameter ST_MEM_to_MDR3 = 7'd32; 
-    parameter ST_REG_write = 7'd33; 
-    parameter ST_store1 = 7'd34;
-    parameter ST_store2 = 7'd35;
-    parameter ST_store3 = 7'd36;
-    parameter ST_jump = 7'd37;
-    parameter ST_jal = 7'd38;
-    parameter ST_adress_store = 7'd39;
-    parameter  ST_jr = 7'd40;
+    parameter ST_REG_write   = 7'd33; 
+    parameter ST_store1      = 7'd34;
+    parameter ST_store2      = 7'd35;
+    parameter ST_store3      = 7'd36;
+
+    // J instructions
+
+    parameter ST_jump        = 7'd37;
+    parameter ST_jal         = 7'd38;
+    parameter ST_adress_store= 7'd39;
+    parameter  ST_jr         = 7'd40;
 
 
 // Opcodes Parameters
@@ -359,7 +358,7 @@ always @(posedge clk) begin
                 ALU_srcB = 3'b000;
                 ALU_OP = 3'b001;
                 ALUReg_write = 1'b1;
-                COUNTER = COUNTER + 1;
+                COUNTER = COUNTER + 1;  // COUNTER = 1
             end
 
             ST_and:begin
@@ -368,7 +367,7 @@ always @(posedge clk) begin
                 ALU_srcB = 3'b000;
                 ALU_OP = 3'b011;
                 ALUReg_write = 1'b1;
-                COUNTER = COUNTER + 1;
+                COUNTER = COUNTER + 1;  // COUNTER = 1
             end
 
             ST_sub:begin
@@ -377,38 +376,44 @@ always @(posedge clk) begin
                 ALU_srcB = 3'b000;
                 ALU_OP = 3'b010;
                 ALUReg_write = 1'b1;
-                COUNTER = COUNTER + 1;
+                COUNTER = COUNTER + 1;  // COUNTER = 1
             end
 
             ST_load_adress: begin  //Estado para calcular o endereço do valor a ser carregado. 
-                STATE = ST_MEM_read;
+                STATE = ST_MEM_read; 
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b010;
                 ALU_OP   = 3'b001;
-                COUNTER  = COUNTER + 1;
+                ALUReg_write = 1;
+                COUNTER  = COUNTER + 1; // COUNTER = 1
+                if (OPCODE == SW) begin
+                    STATE = ST_store1;
+                end else begin
+                    STATE = ST_MEM_read;
+                end
+
             end
 
             ST_MEM_read: begin //Lendo o valor a ser carregado. 
                 IorD = 3'b001;
                 MEM_wr = 0;
                 COUNTER = COUNTER + 1;
-                if (COUNTER == 7'd1) begin
-                    STATE = ST_MEM_read;
-                end
-                    else begin
-                    if (OPCODE == 6'b100011) begin
+                if (COUNTER == 7'd3) begin
+                    if (OPCODE == LW) begin
+                    STATE = ST_MEM_to_MDR1;
+                    end else if begin                 
                        STATE = ST_MEM_to_MDR1;
-                    end else if (OPCODE == 6'b100001) begin
+                    end else if (OPCODE == LH) begin
                         STATE = ST_MEM_to_MDR2;
-                    end else if (OPCODE == 6'b100000) begin
+                    end else if (OPCODE == LB) begin
                         STATE = ST_MEM_to_MDR3;
-                    end else if (OPCODE == 6'b101011) begin
-                        STATE = ST_store1;
-                    end else if (OPCODE == 6'b101001) begin
+                    end else if (OPCODE == SH) begin
                         STATE = ST_store2;
-                    end else if (OPCODE == 6'b101000) begin
+                    end else if (OPCODE == SB)begin
                         STATE = ST_store3;
                     end
+                end else begin // COUNTER = 2
+                    STATE = ST_MEM_read;
                 end
             end
 
@@ -429,6 +434,7 @@ always @(posedge clk) begin
 
             ST_REG_write: begin //Escrevendo no banco de registradores.
                 STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
                 MEM_toreg = 4'b0001;
                 reg_dst = 2'b00;
                 REG_write = 1;
@@ -436,6 +442,7 @@ always @(posedge clk) begin
 
             ST_store1: begin //Armazenando na memoria.
                 STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
                 BtoC = 2'b00;
                 IorD = 3'b001;
                 MEM_wr = 1;
@@ -443,6 +450,7 @@ always @(posedge clk) begin
 
             ST_store2: begin //Armazenando na memoria.
                 STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
                 BtoC = 2'b01;
                 IorD = 3'b001;
                 MEM_wr = 1;
@@ -450,6 +458,7 @@ always @(posedge clk) begin
 
             ST_store3: begin //Armazenando na memoria.
                 STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
                 BtoC = 2'b10;
                 IorD = 3'b001;
                 MEM_wr = 1;
@@ -457,6 +466,7 @@ always @(posedge clk) begin
 
             ST_jump: begin
                 STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
                 PC_write = 1;
                 branch = 1;
                 PC_src = 3'b010;
@@ -464,12 +474,13 @@ always @(posedge clk) begin
 
             ST_jal: begin //calculando endereço 
                 STATE = ST_adress_store;
-               ALU_srcA = 2'b00;
-               ALU_OP = 3'b000; 
+                ALU_srcA = 2'b00;
+                ALU_OP = 3'b000; 
             end
 
             ST_adress_store: begin //armazenando endereço 
                 STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
                 MEM_toreg = 4'b0000;
                 reg_dst = 2'b11;
                 REG_write = 1;
@@ -480,6 +491,7 @@ always @(posedge clk) begin
 
             ST_jr: begin
                 STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
                 ALU_srcA = 2'b01;
                 ALU_OP = 3'b000;
                 PC_src = 3'b000;
@@ -490,7 +502,7 @@ always @(posedge clk) begin
             ST_BREG_write:begin
                 if (OV) begin
                     STATE = ST_overflow;
-                    COUNTER = COUNTER + 1;
+                    COUNTER = COUNTER + 1;  // COUNTER = 2
                 end
                 else begin
                     STATE = ST_fetch0;
@@ -503,7 +515,7 @@ always @(posedge clk) begin
 
             ST_BREG_write2:begin
                 if(OV) begin
-                    STATE = ST_overflow;
+                    STATE = ST_overflow;    // COUNTER = 2
                     COUNTER = COUNTER + 1;
                 end
                 else begin
@@ -602,6 +614,13 @@ always @(posedge clk) begin
                 reg_dst = 2'b00;  
             end
 
+            ST_Rte:begin
+                STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
+                PC_src = 3'b100;
+                PC_write = 1;
+            end 
+
             ST_noopcode:begin
                 except = 2'b00;
                 IorD = 3'b010;
@@ -610,10 +629,10 @@ always @(posedge clk) begin
                 ALU_srcB = 3'b001;
                 ALU_OP = 3'b010;
                 COUNTER = COUNTER + 1;
-                if (COUNTER == 7'b0001000) begin
+                if (COUNTER == 7'd1) begin
                     STATE = ST_except;
                 end
-                else begin
+                else begin // COUNTER = 0
                     STATE = ST_noopcode;
                 end
             end
@@ -625,11 +644,11 @@ always @(posedge clk) begin
                 ALU_srcA = 2'b00;
                 ALU_srcB = 3'b001;
                 ALU_OP = 3'b010;
-                COUNTER = COUNTER + 1;
-                if (COUNTER == 7'b0001000) begin
+                COUNTER = COUNTER + 1;  
+                if (COUNTER == 7'd4) begin
                     STATE = ST_except;
                 end
-                else begin
+                else begin  //COUNTER = 3
                     STATE = ST_overflow;
                 end
             end
@@ -676,7 +695,14 @@ always @(posedge clk) begin
                 COUNTER = COUNTER + 1;
             end
 
-     
+            ST_lui:begin
+              STATE = ST_fetch0;
+              COUNTER = 7'b0000000;
+              MEM_toreg = 4'b1000;
+              reg_dst = 2'b00;
+              REG_write = 1'b1;
+            end
+
         // INSTRUCTIONS STATES
         ST_decode2: begin
             case(OPCODE)
@@ -685,12 +711,12 @@ always @(posedge clk) begin
                     case(FUNCT)
                         FUNCT_ADD:begin
                             STATE = ST_add;
-                            COUNTER = COUNTER + 1;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_AND:begin
                             STATE = ST_and;
-                            COUNTER = COUNTER + 1;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_DIV:begin
@@ -703,7 +729,7 @@ always @(posedge clk) begin
 
                         FUNCT_JR:begin
                             STATE = ST_jr;
-                            COUNTER = COUNTER + 1;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_MFHI:begin
@@ -745,7 +771,7 @@ always @(posedge clk) begin
 
                         FUNCT_SUB:begin
                             STATE = ST_sub;
-                            COUNTER = COUNTER + 1;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_BREAK:begin
@@ -753,7 +779,8 @@ always @(posedge clk) begin
                         end
 
                         FUNCT_RTE:begin
-                            
+                            STATE = ST_Rte;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_DIVM:begin
@@ -764,12 +791,12 @@ always @(posedge clk) begin
                 // I instructions 
                 ADDI:begin
                     STATE = ST_addi;
-                    COUNTER = COUNTER + 1;
+                    COUNTER = 7'b0000000;
                 end
 
                 ADDIU:begin
                     STATE = ST_addiu;
-                    COUNTER = COUNTER +1;
+                    COUNTER = 7'b0000000;
                 end
 
                 BEQ:begin
@@ -793,33 +820,33 @@ always @(posedge clk) begin
                 end
 
                 LB:begin
-                   STATE = ST_lb;
-                   COUNTER = COUNTER + 1; 
+                   STATE = ST_load_adress;
+                   COUNTER = 7'b0000000; 
                 end
 
                 LH:begin
-                    STATE = ST_lh;
-                    COUNTER = COUNTER + 1;
+                    STATE = ST_load_adress;
+                    COUNTER = 7'b0000000;
                 end
 
                 LUI:begin
                     STATE = ST_lui;
-                    COUNTER = COUNTER + 1;
+                    COUNTER = 7'b0000000;
                 end
 
                 LW:begin
-                    STATE = ST_lw;
-                    COUNTER = COUNTER + 1;
+                    STATE = ST_load_adress;
+                    COUNTER = 7'b0000000;
                 end
 
                 SB:begin
-                    STATE = ST_sb;
-                    COUNTER = COUNTER + 1;
+                    STATE = ST_load_adress;
+                    COUNTER = 7'b0000000;
                 end
 
                 SH:begin
-                    STATE = ST_sh;
-                    COUNTER = COUNTER + 1;
+                    STATE = ST_load_adress;
+                    COUNTER = 7'b0000000;
                 end
 
                 SLTI:begin
@@ -828,24 +855,25 @@ always @(posedge clk) begin
                 end
 
                 SW:begin
-                    STATE = ST_sw;
-                    COUNTER = COUNTER + 1;
+                    STATE = ST_load_adress;
+                    COUNTER = 7'b0000000;
                 end
 
                 // J instructions
                 J:begin
                     STATE = ST_jump;
-                    COUNTER = COUNTER + 1;
+                    COUNTER = 7'b0000000;
                 end
 
                 JAL:begin
                     STATE = ST_jal;
-                    COUNTER = COUNTER + 1;
+                    COUNTER = 7'b0000000;           
                 end
 
                 // NO OPCODE EXCEPTION
                 default:begin
                     STATE = ST_noopcode;
+                    COUNTER = 7'b0000000; 
                 end
             endcase
         end
