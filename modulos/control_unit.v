@@ -531,6 +531,55 @@ always @(posedge clk) begin
                 COUNTER = 7'd0;
             end
 
+            ST_beq: begin
+                STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b000;
+                if (EQ == 1) begin
+                    ALU_OP = 3'b111;
+                    PC_src = 3'b001;
+                    PC_write = 1;
+                end
+            end
+
+            ST_bne: begin
+                STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b000;
+                if (EQ == 0) begin
+                    ALU_OP = 3'b111;
+                    PC_src = 3'b001;
+                    PC_write = 1;
+                end
+            end
+
+            ST_bgt: begin
+                STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b000;
+                if (GT == 1) begin
+                    ALU_OP = 3'b111;
+                    PC_src = 3'b001;
+                    PC_write = 1;
+                end
+            end
+
+            ST_ble: begin
+                STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b000;
+                if (GT == 0) begin
+                    ALU_OP = 3'b111;
+                    PC_src = 3'b001;
+                    PC_write = 1;
+                end
+            end
+
+
             ST_BREG_write:begin
                 if (OV) begin
                     STATE = ST_overflow;
@@ -837,19 +886,23 @@ always @(posedge clk) begin
                 end
 
                 BEQ:begin
-                    
+                    STATE = ST_beq;
+                    COUNTER = COUNTER + 1;
                 end
 
                 BNE:begin
-                    
+                    STATE = ST_beq;
+                    COUNTER = COUNTER + 1;
                 end
 
                 BLE:begin
-                    
+                    STATE = ST_beq;
+                    COUNTER = COUNTER + 1;
                 end
 
                 BGT:begin
-                    
+                    STATE = ST_beq;
+                    COUNTER = COUNTER + 1;
                 end
 
                 ADDM:begin
