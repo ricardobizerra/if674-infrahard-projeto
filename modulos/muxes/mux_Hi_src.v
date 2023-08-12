@@ -1,4 +1,4 @@
-module Hi_src(
+module mux_Hi_src(
     input wire [31:0] DIV_max,
     input wire [31:0] MULT_max,
     input wire sel,

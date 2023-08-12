@@ -12,42 +12,40 @@ module control_unit(
     input wire [5:0] OPCODE,
     input wire [5:0] FUNCT,
 // Control wires with 1 bit
-    output wire PC_write,
-    output wire branch,
-    output wire MEM_wr,
-    output wire IR_write,
-    output wire A_write,
-    output wire B_write,
-    output wire MDR_write,
-    output wire ALUReg_write,
-    output wire EPC_write,
-    output wire Hi_write,
-    output wire Lo_write,
-    output wire REG_write,
-    output wire less_than,
-    output wire DIV_on,
-    output wire MULT_on,
-    output wire overflow,
-    output wire dzero,
-    output wire div_srcA,
-    output wire div_srcB,
-    output wire shift_src,
-    output wire Hi_src,
-    output wire Lo_src,
+    output reg PC_write,
+    output reg branch,
+    output reg MEM_wr,
+    output reg IR_write,
+    output reg A_write,
+    output reg B_write,
+    output reg MDR_write,
+    output reg ALUReg_write,
+    output reg EPC_write,
+    output reg Hi_write,
+    output reg Lo_write,
+    output reg REG_write,
+    output reg less_than,
+    output reg DIV_on,
+    output reg MULT_on,
+    output reg div_srcA,
+    output reg div_srcB,
+    output reg shift_src,
+    output reg Hi_src,
+    output reg Lo_src,
 // Control wires with 2 bit   
-    output wire [1:0] reg_dst,
-    output wire [1:0] except,
-    output wire [1:0] MEM_toMDR,
-    output wire [1:0] BtoC,
-    output wire [1:0] ALU_srcA,
-// Control wires with 3 bit    
-    output wire [2:0] IorD,
-    output wire [2:0] ALU_srcB,
-    output wire [2:0] ALU_OP,
-    output wire [2:0] PC_src,
-    output wire [2:0] regOP,
+    output reg [1:0] reg_dst,
+    output reg [1:0] except,
+    output reg [1:0] MEM_toMDR,
+    output reg [1:0] BtoC,
+    output reg [1:0] ALU_srcA,
+// Control wiress with 3 bit    
+    output reg [2:0] IorD,
+    output reg [2:0] ALU_srcB,
+    output reg [2:0] ALU_OP,
+    output reg [2:0] PC_src,
+    output reg [2:0] regOP,
 // Control wire with 4 bit    
-    output wire [3:0] MEM_toreg,
+    output reg [3:0] MEM_toreg,
 // Control wire for reset instruction
     output reg reset_out    
 );
@@ -63,10 +61,59 @@ module control_unit(
 // Main States Parameters
     // initial states
 
-    parameter ST_reset = 6'd0;
-    parameter ST_fetch0 = 6'd1;
-    parameter ST_fetch1 = 6'd2;
-    parameter ST_decode = 6'd3;
+    parameter ST_reset       = 7'd0;
+    parameter ST_fetch0      = 7'd1;
+    parameter ST_fetch1      = 7'd2;
+    parameter ST_decode      = 7'd3;
+    parameter ST_decode2     = 7'd15;
+
+    // exceptions states
+
+    parameter ST_noopcode    = 7'd4;
+    parameter ST_overflow    = 7'd5;
+    parameter ST_divzr       = 7'd6;
+    parameter ST_except      = 7'd7;
+
+    // R instructions
+
+    parameter ST_add         = 7'd8;
+    parameter ST_sub         = 7'd9;
+    parameter ST_and         = 7'd10;
+    parameter ST_BREG_write  = 7'd11;
+    parameter ST_BREG_write2 = 7'd12;
+    parameter ST_BREG_write3 = 7'd34;
+
+
+    // I instructions
+
+    parameter ST_addi        = 7'd13;
+    parameter ST_addiu       = 7'd14;
+    parameter ST_lw          = 7'd16;
+    parameter ST_lh          = 7'd17;
+    parameter ST_lb          = 7'd18;
+    parameter ST_sw          = 7'd19;
+    parameter ST_sh          = 7'd20;
+    parameter ST_sb          = 7'd21;
+    parameter ST_lui         = 7'd22;
+    parameter ST_beq         = 7'd23;
+    parameter ST_bne         = 7'd24;
+    parameter ST_ble         = 7'd25;
+    parameter ST_bgt         = 7'd26; 
+    parameter ST_load_adress = 7'd27; 
+    parameter ST_MEM_read    = 7'd28; 
+    parameter ST_MEM_to      = 7'd29;  
+    parameter ST_MEM_to_MDR1 = 7'd30;  
+    parameter ST_MEM_to_MDR2 = 7'd31;  
+    parameter ST_MEM_to_MDR3 = 7'd32; 
+    parameter ST_REG_write = 7'd33; 
+    parameter ST_store1 = 7'd34;
+    parameter ST_store2 = 7'd35;
+    parameter ST_store3 = 7'd36;
+    parameter ST_jump = 7'd37;
+    parameter ST_jal = 7'd38;
+    parameter ST_adress_store = 7'd39;
+    parameter  ST_jr = 7'd40;
+
 
 // Opcodes Parameters
     // R instructions
@@ -110,12 +157,39 @@ module control_unit(
     parameter J = 6'h2; 
     parameter JAL = 6'h3; 
 
-initial begin
-    // Initial reset 
-    reset = 1'b1;
-end
 
 always @(posedge clk) begin
+    PC_write     = 1'b0;
+    branch       = 1'b0;
+    MEM_wr       = 1'b0;
+    IR_write     = 1'b0;
+    A_write      = 1'b0;
+    B_write      = 1'b0;
+    MDR_write    = 1'b0;
+    ALUReg_write = 1'b0;
+    EPC_write    = 1'b0;
+    REG_write    = 1'b0;
+    Hi_write     = 1'b0;
+    Lo_write     = 1'b0;
+    less_than    = 1'b0;
+    shift_src    = 1'b0;
+    DIV_on       = 1'b0;
+    MULT_on      = 1'b0;
+    div_srcA     = 1'b0;
+    div_srcB     = 1'b0;
+    Hi_src       = 1'b0;
+    Lo_src       = 1'b0;
+    except       = 2'b00; 
+    MEM_toMDR    = 2'b00;
+    BtoC         = 2'b00;
+    ALU_srcA     = 2'b00;
+    reg_dst      = 2'b00; 
+    IorD         = 3'b000;
+    ALU_srcB     = 3'b000;
+    ALU_OP       = 3'b000;
+    PC_src       = 3'b000;
+    regOP        = 3'b000;
+    MEM_toreg    = 4'b0000;
     if (reset == 1'b1) begin
         STATE = ST_fetch0;
         // Setting ALL signals to zero
@@ -130,21 +204,16 @@ always @(posedge clk) begin
         EPC_write    = 1'b0;
         Hi_write     = 1'b0;
         Lo_write     = 1'b0;
-        REG_write    = 1'b0;
         less_than    = 1'b0;
         DIV_on       = 1'b0;
         MULT_on      = 1'b0;
-        overflow     = 1'b0;
-        dzero        = 1'b0;
         div_srcA     = 1'b0;
         div_srcB     = 1'b0;
         shift_src    = 1'b0;
         Hi_src       = 1'b0;
         Lo_src       = 1'b0;
-        reg_dst      = 2'b00;
         except       = 2'b00; 
         MEM_toMDR    = 2'b00;
-        shift_src    = 2'b00;
         BtoC         = 2'b00;
         ALU_srcA     = 2'b00;
         IorD         = 3'b000;
@@ -152,179 +221,291 @@ always @(posedge clk) begin
         ALU_OP       = 3'b000;
         PC_src       = 3'b000;
         regOP        = 3'b000;
-        MEM_toreg    = 4'b0000;
         // Setting couter for next operation
         COUNTER = 7'b0000000;
         // reseting the stack top
-
+        reg_dst      = 2'b10; 
+        REG_write    = 1'b1;
+        MEM_toreg    = 4'b0100;
+        reset_out    = 1'b0;
     end 
     else begin
         case (STATE)
-            if(COUNTER == 7'b0000000 || COUNTER == 7'b0000001) begin
-                ST_fetch0:begin
-                    PC_write     = 1'b0;
-                    branch       = 1'b0;
-                    MEM_wr       = 1'b0;
-                    IR_write     = 1'b0;
-                    A_write      = 1'b0;
-                    B_write      = 1'b0;
-                    MDR_write    = 1'b0;
-                    MEM_wr       = 1'b1;  ///
-                    ALUReg_write = 1'b0;
-                    EPC_write    = 1'b0;
-                    Hi_write     = 1'b0;
-                    Lo_write     = 1'b0;
-                    REG_write    = 1'b0;
-                    less_than    = 1'b0;
-                    DIV_on       = 1'b0;
-                    MULT_on      = 1'b0;
-                    overflow     = 1'b0;
-                    dzero        = 1'b0;
-                    div_srcA     = 1'b0;
-                    div_srcB     = 1'b0;
-                    shift_src    = 1'b0;
-                    Hi_src       = 1'b0;
-                    Lo_src       = 1'b0;
-                    reg_dst      = 2'b00;
-                    except       = 2'b00; 
-                    MEM_toMDR    = 2'b00;
-                    shift_src    = 2'b00;
-                    BtoC         = 2'b00;
-                    ALU_srcA     = 2'b00;  ///
-                    IorD         = 3'b001; ///
-                    ALU_srcB     = 3'b001; ///
-                    ALU_OP       = 3'b001; ///
-                    PC_src       = 3'b000;
-                    regOP        = 3'b000;
-                    MEM_toreg    = 4'b0000;
+
+            ST_fetch0: begin
+                PC_write     = 1'b0;
+                branch       = 1'b0;
+                IR_write     = 1'b0;
+                A_write      = 1'b0;
+                B_write      = 1'b0;
+                MDR_write    = 1'b0;
+                MEM_wr       = 1'b0;  ///
+                ALUReg_write = 1'b0;
+                EPC_write    = 1'b0;
+                Hi_write     = 1'b0;
+                Lo_write     = 1'b0;
+                REG_write    = 1'b0;
+                less_than    = 1'b0;
+                DIV_on       = 1'b0;
+                MULT_on      = 1'b0;
+                div_srcA     = 1'b0;
+                div_srcB     = 1'b0;
+                shift_src    = 1'b0;
+                Hi_src       = 1'b0;
+                Lo_src       = 1'b0;
+                reg_dst      = 2'b00;
+                except       = 2'b00; 
+                MEM_toMDR    = 2'b00;
+                shift_src    = 2'b00;
+                BtoC         = 2'b00;
+                ALU_srcA     = 2'b00;  ///
+                IorD         = 3'b000; ///
+                ALU_srcB     = 3'b001; ///
+                ALU_OP       = 3'b001; ///
+                PC_src       = 3'b000;
+                regOP        = 3'b000;
+                MEM_toreg    = 4'b0000;
+                COUNTER = COUNTER + 1;
+                if (COUNTER == 7'd2) begin  
                     STATE = ST_fetch1;
-                    COUNTER = COUNTER + 1;
                 end
-
-                ST_fetch1:begin
-                    STATE = ST_decode;      
-                    PC_write     = 1'b1;    ///
-                    branch       = 1'b0;
-                    MEM_wr       = 1'b0;
-                    IR_write     = 1'b1;    ///
-                    A_write      = 1'b0;
-                    B_write      = 1'b0;
-                    MDR_write    = 1'b0;
-                    MEM_wr       = 1'b1;
-                    ALUReg_write = 1'b0;
-                    EPC_write    = 1'b0;
-                    Hi_write     = 1'b0;
-                    Lo_write     = 1'b0;
-                    REG_write    = 1'b0;
-                    less_than    = 1'b0;
-                    DIV_on       = 1'b0;
-                    MULT_on      = 1'b0;
-                    overflow     = 1'b0;
-                    dzero        = 1'b0;
-                    div_srcA     = 1'b0;
-                    div_srcB     = 1'b0;
-                    shift_src    = 1'b0;
-                    Hi_src       = 1'b0;
-                    Lo_src       = 1'b0;
-                    reg_dst      = 2'b00;
-                    except       = 2'b00; 
-                    MEM_toMDR    = 2'b00;
-                    shift_src    = 2'b00;
-                    BtoC         = 2'b00;
-                    ALU_srcA     = 2'b00;
-                    IorD         = 3'b001;
-                    ALU_srcB     = 3'b001;
-                    ALU_OP       = 3'b001;
-                    PC_src       = 3'b000; ///
-                    regOP        = 3'b000;
-                    MEM_toreg    = 4'b0000;
-                    COUNTER = COUNTER + 1;
+                else begin
+                    STATE = ST_fetch0;
                 end
+            end
+            ST_fetch1:begin // COUNTER = 3
+                STATE = ST_decode;      
+                PC_write     = 1'b1;    ///
+                branch       = 1'b0;
+                MEM_wr       = 1'b0;
+                IR_write     = 1'b1;    ///
+                A_write      = 1'b0;
+                B_write      = 1'b0;
+                MDR_write    = 1'b0;
+                ALUReg_write = 1'b0;
+                EPC_write    = 1'b0;
+                Hi_write     = 1'b0;
+                Lo_write     = 1'b0;
+                REG_write    = 1'b0;
+                less_than    = 1'b0;
+                DIV_on       = 1'b0;
+                MULT_on      = 1'b0;
+                div_srcA     = 1'b0;
+                div_srcB     = 1'b0;
+                shift_src    = 1'b0;
+                Hi_src       = 1'b0;
+                Lo_src       = 1'b0;
+                reg_dst      = 2'b00;
+                except       = 2'b00; 
+                MEM_toMDR    = 2'b00;
+                shift_src    = 2'b00;
+                BtoC         = 2'b00;
+                ALU_srcA     = 2'b00;
+                IorD         = 3'b000;
+                ALU_srcB     = 3'b001;
+                ALU_OP       = 3'b001;
+                PC_src       = 3'b000; ///
+                regOP        = 3'b000;
+                MEM_toreg    = 4'b0000;
+                COUNTER      = COUNTER + 1;
+            end
+            ST_decode:begin   // COUNTER = 4  
+                STATE        = ST_decode2;   
+                PC_write     = 1'b0;
+                branch       = 1'b0;
+                MEM_wr       = 1'b0;
+                IR_write     = 1'b0;
+                A_write      = 1'b1; ///
+                B_write      = 1'b1; ///
+                MDR_write    = 1'b0;
+                ALUReg_write = 1'b0;
+                EPC_write    = 1'b0;
+                Hi_write     = 1'b0;
+                Lo_write     = 1'b0;
+                REG_write    = 1'b0;
+                less_than    = 1'b0;
+                DIV_on       = 1'b0;
+                MULT_on      = 1'b0;
+                div_srcA     = 1'b0;
+                div_srcB     = 1'b0;
+                shift_src    = 1'b0;
+                Hi_src       = 1'b0;
+                Lo_src       = 1'b0;
+                reg_dst      = 2'b00;
+                except       = 2'b00; 
+                MEM_toMDR    = 2'b00;
+                shift_src    = 2'b00;
+                BtoC         = 2'b00;
+                ALU_srcA     = 2'b00;  ///
+                IorD         = 3'b000; 
+                ALU_srcB     = 3'b001; ///
+                ALU_OP       = 3'b001; ///
+                PC_src       = 3'b000;
+                regOP        = 3'b000;
+                MEM_toreg    = 4'b0000;
+                COUNTER = COUNTER + 1;
+            end
 
-                ST_decode:begin
-                    ALU_srcA = 2'b00;
-                    ALU_srcB = 3'b011;
-                    ALU_OP = 3'b001;
- 
-                    PC_write     = 1'b1;
-                    branch       = 1'b0;
-                    MEM_wr       = 1'b0;
-                    IR_write     = 1'b1;
-                    A_write      = 1'b0;
-                    B_write      = 1'b0;
-                    MDR_write    = 1'b0;
-                    MEM_wr       = 1'b1;
-                    ALUReg_write = 1'b0;
-                    EPC_write    = 1'b0;
-                    Hi_write     = 1'b0;
-                    Lo_write     = 1'b0;
-                    REG_write    = 1'b0;
-                    less_than    = 1'b0;
-                    DIV_on       = 1'b0;
-                    MULT_on      = 1'b0;
-                    overflow     = 1'b0;
-                    dzero        = 1'b0;
-                    div_srcA     = 1'b0;
-                    div_srcB     = 1'b0;
-                    shift_src    = 1'b0;
-                    Hi_src       = 1'b0;
-                    Lo_src       = 1'b0;
-                    reg_dst      = 2'b00;
-                    except       = 2'b00; 
-                    MEM_toMDR    = 2'b00;
-                    shift_src    = 2'b00;
-                    BtoC         = 2'b00;
-                    ALU_srcA     = 2'b00;  ///
-                    IorD         = 3'b001; 
-                    ALU_srcB     = 3'b011; ///
-                    ALU_OP       = 3'b001; ///
-                    PC_src       = 3'b000;
-                    regOP        = 3'b000;
-                    MEM_toreg    = 4'b0000;
-                    COUNTER = COUNTER + 1;
+            ST_add:begin
+                STATE = ST_BREG_write;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b000;
+                ALU_OP = 3'b001;
+                ALUReg_write = 1'b1;
+                COUNTER = COUNTER + 1;
+            end
+
+            ST_and:begin
+                STATE = ST_BREG_write;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b000;
+                ALU_OP = 3'b011;
+                ALUReg_write = 1'b1;
+                COUNTER = COUNTER + 1;
+            end
+
+            ST_sub:begin
+                STATE = ST_BREG_write;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b000;
+                ALU_OP = 3'b010;
+                ALUReg_write = 1'b1;
+                COUNTER = COUNTER + 1;
+            end
+
+            ST_load_adress: begin  //Estado para calcular o endereço do valor a ser carregado. 
+                STATE = ST_MEM_read;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b010;
+                ALU_OP   = 3'b001;
+                COUNTER  = COUNTER + 1;
+            end
+
+            ST_MEM_read: begin //Lendo o valor a ser carregado. 
+                IorD = 3'b001;
+                MEM_wr = 0;
+                COUNTER = COUNTER + 1;
+                if (COUNTER == 7'd1) begin
+                    STATE = ST_MEM_read;
+                end
+                    else begin
+                    if (OPCODE == 6'b100011) begin
+                       STATE = ST_MEM_to-MDR1;
+                    end else if (OPCODE == 6'b100001) begin
+                        STATE = ST_MEM_to-MDR2;
+                    end else if (OPCODE == 6'b100000) begin
+                        STATE = ST_MEM_to-MDR3;
+                    end else if (OPCODE == 6'b101011) begin
+                        STATE = ST_store1;
+                    end else if (OPCODE == 6'b101001) begin
+                        STATE = ST_store2;
+                    end else if (OPCODE == 6'b101000) begin
+                        STATE = ST-ST_store3;
+                    end
                 end
             end
 
-            // INSTRUCTIONS STATES
-            else if(COUNTER == 7'b0000011) begin
-                case(OPCODE)
-                    ADD: begin
-                        STATE = ST_ADD
-                    end
+            ST_MEM_to_MDR1: begin //selecionando o valor que irá entra na registrador temporário.
+                STATE = ST_REG_write;
+                MEM_toMDR = 2'b00;
+            end
 
-                    FUNCT_SLL: begin
-                        STATE = ST_ShiftImmediate
-                        SHIFT_MODE = ST_SLL_SLLV
-                    end
+            ST_MEM_to_MDR2: begin //selecionando o valor que irá entra na registrador temporário.
+                STATE = ST_REG_write;
+                MEM_toMDR = 2'b01;
+            end
 
-                    FUNCT_SRL: begin
-                        STATE = ST_ShiftImmediate
-                        SHIFT_MODE = ST_SRL
-                    end
+            ST_MEM_to_MDR3: begin //selecionando o valor que irá entra na registrador temporário.
+                STATE = ST_REG_write;
+                MEM_toMDR = 2'b10;
+            end
 
-                    FUNCT_SRA: begin
-                        STATE = ST_ShiftImmediate
-                        SHIFT_MODE = ST_SRA_SRAV
-                    end
+            ST_REG_write: begin //Escrevendo no banco de registradores.
+                STATE = ST_fetch0;
+                MEM_toreg = 4'b0001;
+                reg_dst = 2'b00;
+                REG_write = 1;
+            end
 
-                    FUNCT_SLLV: begin
-                        STATE = ST_ShiftVariable
-                        SHIFT_MODE = ST_SLL_SLLV
-                    end
+            ST_store1: begin //Armazenando na memoria.
+                STATE = ST_fetch0;
+                BtoC = 2'b00;
+                IorD = 3'b001;
+                MEM_wr = 1;
+            end
 
-                    FUNCT_SRLV: begin
-                        STATE = ST_ShiftVariable
-                        SHIFT_MODE = ST_SRL
-                    end
+            ST_store2: begin //Armazenando na memoria.
+                STATE = ST_fetch0;
+                BtoC = 2'b01;
+                IorD = 3'b001;
+                MEM_wr = 1;
+            end
 
-                    FUNCT_SLT: begin
-                        STATE = ST_SLT
-                    end
+            ST_store3: begin //Armazenando na memoria.
+                STATE = ST_fetch0;
+                BtoC = 2'b10;
+                IorD = 3'b001;
+                MEM_wr = 1;
+            end
 
-                    SLTI: begin
-                        STATE = ST_SLTI
+            ST_jump: begin
+                STATE = ST_fetch0;
+                PC_write = 1;
+                branch = 1;
+                PC_src = 3'b010;
+            end
+
+            ST_jal: begin //calculando endereço 
+                STATE = ST_adress_store;
+               ALU_srcA = 2'b00;
+               ALU_OP = 3'b000; 
+            end
+
+            ST_adress_store: begin //armazenando endereço 
+                STATE = ST_fetch0;
+                MEM_toreg = 4'b0000;
+                reg_dst = 2'b11;
+                REG_write = 1;
+                PC_src = 3'b010;
+                PC_write = 1;
+                branch = 1;
+            end
+
+            ST_jr: begin
+                STATE = ST_fetch0;
+                ALU_srcA = 2'b01;
+                ALU_OP = 3'b000;
+                PC_src = 3'b000;
+                branch = 1;
+                PC_write = 1;
+            end
+
+            ST_BREG_write:begin
+                if (OV) begin
+                    STATE = ST_overflow;
+                    COUNTER = COUNTER + 1;
+                end
+                else begin
+                    STATE = ST_fetch0;
+                    COUNTER = 7'b0000000;
+                    REG_write = 1'b1;
+                    reg_dst = 2'b01;
+                    MEM_toreg = 4'b0000;
+                end
+            end
+
+            ST_BREG_write2:begin
+                if(OV) begin
+                    STATE = ST_overflow;
+                    COUNTER = COUNTER + 1;
+                end
+                else begin
+                        STATE = ST_fetch0;
+                        COUNTER = 7'b0000000;
+                        REG_write = 1'b1;
+                        MEM_toreg = 4'b0000;
+                        reg_dst = 2'b00;
                     end
-                endcase
             end
 
             ST_SLT:begin
@@ -405,8 +586,262 @@ always @(posedge clk) begin
                 REG_write = 1'b1
                 COUNTER = 0
             end
+
+            ST_BREG_write3:begin
+                STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
+                REG_write = 1'b1;
+                MEM_toreg = 4'b0000;
+                reg_dst = 2'b00;  
+            end
+
+            ST_noopcode:begin
+                except = 2'b00;
+                IorD = 3'b010;
+                MEM_wr = 1'b0;
+                ALU_srcA = 2'b00;
+                ALU_srcB = 3'b001;
+                ALU_OP = 3'b010;
+                COUNTER = COUNTER + 1;
+                if (COUNTER == 7'b0001000) begin
+                    STATE = ST_except;
+                end
+                else begin
+                    STATE = ST_noopcode;
+                end
+            end
+
+            ST_overflow:begin
+                except = 2'b01;
+                IorD = 3'b010;
+                MEM_wr = 1'b0;
+                ALU_srcA = 2'b00;
+                ALU_srcB = 3'b001;
+                ALU_OP = 3'b010;
+                COUNTER = COUNTER + 1;
+                if (COUNTER == 7'b0001000) begin
+                    STATE = ST_except;
+                end
+                else begin
+                    STATE = ST_overflow;
+                end
+            end
+
+            ST_divzr:begin
+                except = 2'b10;
+                IorD = 3'b010;
+                MEM_wr = 1'b0;
+                ALU_srcA = 2'b00;
+                ALU_srcB = 3'b001;
+                ALU_OP = 3'b010;
+                COUNTER = COUNTER + 1;
+                if (COUNTER == 7'b0001000) begin
+                    STATE = ST_except;
+                end
+                else begin
+                    STATE = ST_divzr;
+                end
+            end
+
+            ST_except:begin
+                STATE = ST_fetch0;
+                EPC_write = 1'b1;
+                PC_src  = 3'b011;
+                PC_write = 1'b1;
+                COUNTER = 7'b0000000;
+            end
+
+            ST_addi:begin
+                STATE = ST_BREG_write2;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b010;
+                ALU_OP = 3'b001;
+                ALUReg_write = 1'b1;
+                COUNTER = COUNTER + 1;
+            end
+
+            ST_addiu:begin
+                STATE = ST_BREG_write3;
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b010;
+                ALU_OP = 3'b001;
+                ALUReg_write = 1'b1;
+                COUNTER = COUNTER + 1;
+            end
+
+     
+        // INSTRUCTIONS STATES
+        ST_decode2: begin
+            case(OPCODE)
+                // R instructions
+                R_OPCODE:begin
+                    case(FUNCT)
+                        FUNCT_ADD:begin
+                            STATE = ST_add;
+                            COUNTER = COUNTER + 1;
+                        end
+
+                        FUNCT_AND:begin
+                            STATE = ST_and;
+                            COUNTER = COUNTER + 1;
+                        end
+
+                        FUNCT_DIV:begin
+
+                        end
+
+                        FUNCT_MULT:begin
+                            
+                        end
+
+                        FUNCT_JR:begin
+                            STATE = ST_jr;
+                            COUNTER = COUNTER + 1;
+                        end
+
+                        FUNCT_MFHI:begin
+                            
+                        end
+
+                        FUNCT_MFLO:begin
+                            
+                        end
+
+                        FUNCT_SLL:begin
+                            STATE = ST_ShiftImmediate
+                            SHIFT_MODE = ST_SLL_SLLV
+                        end
+
+                        FUNCT_SLLV:begin
+                            STATE = ST_ShiftVariable
+                            SHIFT_MODE = ST_SLL_SLLV
+                        end
+
+                        FUNCT_SLT:begin
+                            STATE = ST_SLT
+                        end
+
+                        FUNCT_SRA:begin
+                            STATE = ST_ShiftImmediate
+                            SHIFT_MODE = ST_SRA_SRAV
+                        end
+
+                        FUNCT_SRAV:begin
+                            STATE = ST_ShiftVariable
+                            SHIFT_MODE = ST_SRA_SRAV
+                        end
+
+                        FUNCT_SRL:begin
+                            STATE = ST_ShiftImmediate
+                            SHIFT_MODE = ST_SRL
+                        end
+
+                        FUNCT_SUB:begin
+                            STATE = ST_sub;
+                            COUNTER = COUNTER + 1;
+                        end
+
+                        FUNCT_BREAK:begin
+                            
+                        end
+
+                        FUNCT_RTE:begin
+                            
+                        end
+
+                        FUNCT_DIVM:begin
+                            
+                        end
+                    endcase 
+                end
+                // I instructions 
+                ADDI:begin
+                    STATE = ST_addi;
+                    COUNTER = COUNTER + 1;
+                end
+
+                ADDIU:begin
+                    STATE = ST_addiu;
+                    COUNTER = COUNTER +1;
+                end
+
+                BEQ:begin
+                    
+                end
+
+                BNE:begin
+                    
+                end
+
+                BLE:begin
+                    
+                end
+
+                BGT:begin
+                    
+                end
+
+                ADDM:begin
+                    
+                end
+
+                LB:begin
+                   STATE = ST_lb;
+                   COUNTER = COUNTER + 1; 
+                end
+
+                LH:begin
+                    STATE = ST_lh;
+                    COUNTER = COUNTER + 1;
+                end
+
+                LUI:begin
+                    STATE = ST_lui;
+                    COUNTER = COUNTER + 1;
+                end
+
+                LW:begin
+                    STATE = ST_lw;
+                    COUNTER = COUNTER + 1;
+                end
+
+                SB:begin
+                    STATE = ST_sb;
+                    COUNTER = COUNTER + 1;
+                end
+
+                SH:begin
+                    STATE = ST_sh;
+                    COUNTER = COUNTER + 1;
+                end
+
+                SLTI:begin
+
+                end
+
+                SW:begin
+                    STATE = ST_sw;
+                    COUNTER = COUNTER + 1;
+                end
+
+                // J instructions
+                J:begin
+                    STATE = ST_jump;
+                    COUNTER = COUNTER + 1;
+                end
+
+                JAL:begin
+                    STATE = ST_jal;
+                    COUNTER = COUNTER + 1;
+                end
+
+                // NO OPCODE EXCEPTION
+                default:begin
+                    STATE = ST_noopcode;
+                end
+            endcase
+        end
         endcase
     end
 end
-    
 endmodule

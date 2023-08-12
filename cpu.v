@@ -1,13 +1,5 @@
 // Importação de todas as unidades 
 
-// unidades dadas
-
-`include "components_given/Banco_reg.vhd"
-`include "components_given/Instr_Reg.vhd"
-`include "components_given/Memoria.vhd"
-`include "components_given/RegDesloc.vhd"
-`include "components_given/Registrador.vhd"
-`include "components_given/ula32.vhd"
 
 // muxes
 
@@ -59,8 +51,6 @@ module cpu (
     wire less_than;
     wire DIV_on;
     wire MULT_on;
-    wire overflow;
-    wire dzero;
     wire div_srcA;
     wire div_srcB;
     wire shift_src;
@@ -72,7 +62,6 @@ module cpu (
     wire [1:0] reg_dst;
     wire [1:0] except;
     wire [1:0] MEM_toMDR;
-    wire [1:0] shift_src;
     wire [1:0] BtoC;
     wire [1:0] ALU_srcA;
 
@@ -103,9 +92,10 @@ module cpu (
     wire [31:0] PC_out;
     wire [31:0] MEM_address;
     wire [31:0] MEM_out;
-    wire [31:0] combC_out;
     wire [31:0] BREG_to_A;
     wire [31:0] BREG_to_B;
+    wire [31:0] BREG_write_data;
+    wire [4:0] BREG_write_reg;
     wire [31:0] A_out;
     wire [31:0] B_out;
     wire [31:0] SXTND8TO32_MEM_out;
@@ -120,14 +110,13 @@ module cpu (
     wire [31:0] SJ_out;
     wire [31:0] _out;
     wire [31:0] MDR_in;
-    wire [31:0] MDR_out;
     wire [31:0] ALUReg_out;
     wire [31:0] MDR_out;
     wire [31:0] Hi_in;
     wire [31:0] Hi_out;
     wire [31:0] Lo_in;
     wire [31:0] Lo_out;
-    wire [31:0] N;
+    wire [4:0] N;
     wire [31:0] REGSHIFT_out;
     wire [31:0] except_out;
     wire [31:0] DIV_min;
@@ -156,7 +145,7 @@ module cpu (
       clk,
       reset,
       PC_write,
-      PC_in,
+      PC_src_out,
       PC_out
     );
 
@@ -233,14 +222,6 @@ module cpu (
       A_out,
       ALU_srcB,
       ALU_srcB_out  
-    );
-
-    mux_div_srcA M_DIV_SRCA(
-
-    );
-
-    mux_div_srcB M_DIV_SRCB(
-
     );
 
     mux_except M_EXCEPT(
@@ -327,7 +308,8 @@ module cpu (
       SL16_out
     );
 
-    OFFSET = {RS,RT,IMMEDIATE}
+    assign OFFSET = {RS,RT,IMMEDIATE};
+
     shift_jump SJ(
       OFFSET,
       PC_out,
@@ -362,7 +344,7 @@ module cpu (
       MEM_address,
       clk,
       MEM_wr,
-      combC_out,
+      C_out,
       MEM_out
     );
 
@@ -412,7 +394,7 @@ module cpu (
     RegDesloc REGSHIFT(
       clk,
       reset,
-      REGOP,
+      regOP,
       N,
       ALU_srcB_out,
       REGSHIFT_out  
@@ -454,51 +436,56 @@ module cpu (
 
 // Unidade de Controle
 
-    FUNCT = IMMEDIATE[5:0];
+    assign FUNCT = IMMEDIATE[5:0];
     control_unit CTRL(
-      clk,
-      reset,
-      OV,
-      ZR,
-      NEG,
-      EQ,
-      GT,
-      LT,
-      OPCODE,
-      FUNCT,
-      PC_write,
-      MEM_wr,
-      IR_write,
-      A_write,
-      B_write,
-      MDR_write,
-      ALUReg_write,
-      EPC_write,
-      Hi_write,
-      Lo_write,
-      REG_write,
-      less_than,
-      DIV_on,
-      MULT_on,
-      overflow,
-      dzero,
-      div_srcA,
-      div_srcB,
-      shift_src,
-      Hi_src;
-      Lo_src;
-      reg_dst,
-      except,
-      MEM_toMDR,
-      shift_src,
-      BtoC,
-      ALU_srcA,
-      IorD,
-      ALU_srcB,
-      ALU_OP,
-      PC_src,
-      regOP,
-      MEM_toreg
-    );
-
+      // clk e reset
+      .clk(clk),
+      .reset(reset),
+      // flags
+      .OV(OV),
+      .ZR(ZR),
+      .NEG(NEG),
+      .EQ(EQ),
+      .GT(GT),
+      .LT(LT),
+      // instructions
+      .OPCODE(OPCODE),
+      .FUNCT(FUNCT),
+      // sinais de 1 bit
+      .PC_write(PC_write),
+      .MEM_wr(MEM_wr),
+      .IR_write(IR_write),
+      .A_write(A_write),
+      .B_write(B_write),
+      .MDR_write(MDR_write),
+      .ALUReg_write(ALUReg_write),
+      .EPC_write(EPC_write),
+      .Hi_write(Hi_write),
+      .Lo_write(Lo_write),
+      .REG_write(REG_write),
+      .less_than(less_than),
+      .DIV_on(DIV_on),
+      .MULT_on(MULT_on),
+      .div_srcA(div_srcA),
+      .div_srcB(div_srcB),
+      .shift_src(shift_src),
+      .Hi_src(Hi_src),
+      .Lo_src(Lo_src),
+      // sinais de 2 bit
+      .reg_dst(reg_dst),
+      .except(except),
+      .MEM_toMDR(MEM_toMDR),
+      .BtoC(BtoC),
+      .ALU_srcA(ALU_srcA),
+      // sinais de 3 bit
+      .IorD(IorD),
+      .ALU_srcB(ALU_srcB),
+      .ALU_OP(ALU_OP),
+      .PC_src(PC_src),
+      .regOP(regOP),
+      // sinal de 4 bits
+      .MEM_toreg(MEM_toreg),
+      // reset out
+      .reset_out(reset)
+);
 endmodule

@@ -1,4 +1,4 @@
-module Lo_src(
+module mux_Lo_src(
     input wire [31:0] DIV_min,
     input wire [31:0] MULT_min,
     input wire sel,
