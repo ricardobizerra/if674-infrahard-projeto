@@ -418,16 +418,19 @@ always @(posedge clk) begin
             ST_MEM_to_MDR1: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b00;
+                MDR_write = 1;
             end
 
             ST_MEM_to_MDR2: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b01;
+                MDR_write = 1;
             end
 
             ST_MEM_to_MDR3: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b10;
+                MDR_write = 1;
             end
 
             ST_REG_write: begin //Escrevendo no banco de registradores.
@@ -741,11 +744,13 @@ always @(posedge clk) begin
                         FUNCT_SLL:begin
                             STATE = ST_ShiftImmediate;
                             SHIFT_MODE = ST_SLL_SLLV;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_SLLV:begin
                             STATE = ST_ShiftVariable;
                             SHIFT_MODE = ST_SLL_SLLV;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_SLT:begin
@@ -755,16 +760,19 @@ always @(posedge clk) begin
                         FUNCT_SRA:begin
                             STATE = ST_ShiftImmediate;
                             SHIFT_MODE = ST_SRA_SRAV;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_SRAV:begin
                             STATE = ST_ShiftVariable;
                             SHIFT_MODE = ST_SRA_SRAV;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_SRL:begin
                             STATE = ST_ShiftImmediate;
                             SHIFT_MODE = ST_SRL;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_SUB:begin

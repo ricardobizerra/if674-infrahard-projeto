@@ -28,6 +28,7 @@
 `include "modulos/shift_left2.v"
 `include "modulos/shift_left16.v"
 `include "modulos/sign_extend8to32.v"
+`include "modulos/sign_extend8to32_mem.v"
 `include "modulos/sign_extend16to32.v"
 
 
@@ -323,8 +324,8 @@ module cpu (
       SXTND8TO32_EXC_out
     );
 
-    sign_extend8to32  SXTND8TO32_MEM(
-      MEM_out,  // In th sign_extend just  one byte is taked
+    sign_extend8to32_mem SXTND8TO32_MEM(
+      MEM_out[7:0],  // In th sign_extend just  one byte is taked
       SXTND8TO32_MEM_out
     );
 
