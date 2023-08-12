@@ -80,6 +80,7 @@ module control_unit(
     parameter ST_and         = 7'd10;
     parameter ST_BREG_write  = 7'd11;
     parameter ST_BREG_write2 = 7'd12;
+    parameter ST_BREG_write3 = 7'd34;
 
 
     // I instructions
@@ -439,6 +440,14 @@ always @(posedge clk) begin
                     end
             end
 
+            ST_BREG_write3:begin
+                STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
+                REG_write = 1'b1;
+                MEM_toreg = 4'b0000;
+                reg_dst = 2'b00;  
+            end
+
             ST_noopcode:begin
                 except = 2'b00;
                 IorD = 3'b010;
@@ -505,7 +514,7 @@ always @(posedge clk) begin
             end
 
             ST_addiu:begin
-                STATE = ST_BREG_write2;
+                STATE = ST_BREG_write3;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b010;
                 ALU_OP = 3'b001;
