@@ -54,6 +54,7 @@ module control_unit(
 
     reg [6:0] STATE; 
     reg [6:0] COUNTER;
+    reg [5:0] SHIFT_MODE;
 
 // Parameters
 
@@ -81,6 +82,14 @@ module control_unit(
     parameter ST_BREG_write  = 7'd11;
     parameter ST_BREG_write2 = 7'd12;
     parameter ST_BREG_write3 = 7'd34;
+    parameter ST_SLT         = 7'd41;
+    parameter ST_SLTI        = 7'd42;
+    parameter ST_SLL_SLLV    = 7'd43;
+    parameter ST_SRA_SRAV    = 7'd44;
+    parameter ST_SRL         = 7'd45;
+    parameter ST_ShiftS      = 7'd46;
+    parameter ST_ShiftImmediate = 7'd47;
+    parameter ST_ShiftVariable  = 7'd48;
     parameter ST_Rte         = 7'd41;
 
 
@@ -228,6 +237,7 @@ always @(posedge clk) begin
     end 
     else begin
         case (STATE)
+
             ST_fetch0: begin
                 PC_write     = 1'b0;
                 branch       = 1'b0;
@@ -390,6 +400,8 @@ always @(posedge clk) begin
                 COUNTER = COUNTER + 1;
                 if (COUNTER == 7'd3) begin
                     if (OPCODE == LW) begin
+                    STATE = ST_MEM_to_MDR1;
+                    end else if begin                 
                        STATE = ST_MEM_to_MDR1;
                     end else if (OPCODE == LH) begin
                         STATE = ST_MEM_to_MDR2;
@@ -513,6 +525,85 @@ always @(posedge clk) begin
                         MEM_toreg = 4'b0000;
                         reg_dst = 2'b00;
                     end
+            end
+
+            ST_SLT:begin
+                ALU_srcA = 2'b00;
+                ALU_srcB = 3'b000;
+                ALU_OP = 3'b111;
+
+                if (LT == 1) begin
+                    STATE = ST_fetch0;
+                    MEM_toreg = 4'b0110;
+                    reg_dst = 2'b01;
+                    REG_write = 1'b1;
+                end
+                else begin
+                    STATE = ST_fetch0;
+                    MEM_toreg = 4'b0101;
+                    reg_dst = 2'b01;
+                    REG_write = 1'b1;
+                end
+
+                COUNTER = 0;
+            end
+
+            ST_SLTI:begin
+                ALU_srcA = 2'b01;
+                ALU_srcB = 3'b010;
+                ALU_OP = 3'b111;
+
+                if (LT == 1) begin
+                    STATE = ST_fetch0;
+                    MEM_toreg = 4'b0110;
+                    reg_dst = 2'b00;
+                    REG_write = 1'b1;
+                end
+                else begin
+                    STATE = ST_fetch0;
+                    MEM_toreg = 4'b0101;
+                    reg_dst = 2'b00;
+                    REG_write = 1'b1;
+                end
+
+                COUNTER = 0;
+            end
+
+            ST_ShiftImmediate:begin
+                STATE = SHIFT_MODE;
+                ALU_srcB = 3'b000;
+                shift_src = 1'b0;
+                regOP = 3'b001;
+            end
+
+            ST_ShiftVariable:begin
+                STATE = SHIFT_MODE;
+                ALU_srcB = 3'b100;
+                shift_src = 1'b1;
+                regOP = 3'b001;
+            end
+
+            ST_SLL_SLLV:begin
+                STATE = ST_ShiftS;
+                regOP = 3'b010;
+            end
+
+            ST_SRL:begin
+                STATE = ST_ShiftS;
+                regOP = 3'b011;
+            end
+
+            ST_SRA_SRAV:begin
+                STATE = ST_ShiftS;
+                regOP = 3'b100;
+            end
+
+            ST_ShiftS:begin
+                STATE = ST_fetch0;
+                MEM_toreg = 4'b0111;
+                reg_dst = 2'b01;
+                REG_write = 1'b1;
+                COUNTER = 0;
             end
 
             ST_BREG_write3:begin
@@ -650,27 +741,32 @@ always @(posedge clk) begin
                         end
 
                         FUNCT_SLL:begin
-                            
+                            STATE = ST_ShiftImmediate;
+                            SHIFT_MODE = ST_SLL_SLLV;
                         end
 
                         FUNCT_SLLV:begin
-                            
+                            STATE = ST_ShiftVariable;
+                            SHIFT_MODE = ST_SLL_SLLV;
                         end
 
                         FUNCT_SLT:begin
-                            
+                            STATE = ST_SLT;
                         end
 
                         FUNCT_SRA:begin
-                            
+                            STATE = ST_ShiftImmediate;
+                            SHIFT_MODE = ST_SRA_SRAV;
                         end
 
                         FUNCT_SRAV:begin
-                            
+                            STATE = ST_ShiftVariable;
+                            SHIFT_MODE = ST_SRA_SRAV;
                         end
 
                         FUNCT_SRL:begin
-                            
+                            STATE = ST_ShiftImmediate;
+                            SHIFT_MODE = ST_SRL;
                         end
 
                         FUNCT_SUB:begin
@@ -754,7 +850,8 @@ always @(posedge clk) begin
                 end
 
                 SLTI:begin
-
+                    STATE = ST_SLTI;
+                    COUNTER = COUNTER + 1;
                 end
 
                 SW:begin
