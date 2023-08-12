@@ -113,8 +113,6 @@ module control_unit(
     parameter ST_adress_store = 7'd39;
     parameter  ST_jr = 7'd40;
 
-    parameter ST_REG_write   = 7'd33;  
-
 
 // Opcodes Parameters
     // R instructions
