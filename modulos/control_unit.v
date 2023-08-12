@@ -102,7 +102,16 @@ module control_unit(
     parameter ST_MEM_to      = 7'd29;  
     parameter ST_MEM_to_MDR1 = 7'd30;  
     parameter ST_MEM_to_MDR2 = 7'd31;  
-    parameter ST_MEM_to_MDR3 = 7'd32;  
+    parameter ST_MEM_to_MDR3 = 7'd32; 
+    parameter ST_REG_write = 7'd33; 
+    parameter ST_store1 = 7'd34;
+    parameter ST_store2 = 7'd35;
+    parameter ST_store3 = 7'd36;
+    parameter ST_jump = 7'd37;
+    parameter ST_jal = 7'd38;
+    parameter ST_adress_store = 7'd39;
+    parameter  ST_jr = 7'd40;
+
 
 
 // Opcodes Parameters
@@ -142,6 +151,7 @@ module control_unit(
     parameter SH     = 6'h29;
     parameter SLTI   = 6'ha;
     parameter SW     = 6'h2b;
+    parameter JR     = 6'h29;
 
     // J instructions
     parameter J = 6'h2; 
@@ -367,8 +377,8 @@ always @(posedge clk) begin
             ST_load_adress: begin  //Estado para calcular o endereço do valor a ser carregado. 
                 STATE = ST_MEM_read;
                 ALU_srcA = 2'b01;
-                ALU_srcB 3'b010;
-                ALU_OP 3'b001;
+                ALU_srcB = 3'b010;
+                ALU_OP = 3'b001;
                 COUNTER = COUNTER + 1;
             end
 
@@ -397,17 +407,17 @@ always @(posedge clk) begin
                 end
             end
 
-            ST_MEM_to-MDR1: begin //selecionando o valor que irá entra na registrador temporário.
+            ST_MEM_to_MDR1: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b00;
             end
 
-            ST_MEM_to-MDR2: begin //selecionando o valor que irá entra na registrador temporário.
+            ST_MEM_to_MDR2: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b01;
             end
 
-            ST_MEM_to-MDR3: begin //selecionando o valor que irá entra na registrador temporário.
+            ST_MEM_to_MDR3: begin //selecionando o valor que irá entra na registrador temporário.
                 STATE = ST_REG_write;
                 MEM_toMDR = 2'b10;
             end
@@ -448,7 +458,7 @@ always @(posedge clk) begin
             end
 
             ST_jal: begin //calculando endereço 
-                STATE = ;
+                STATE = ST_adress_store;
                ALU_srcA = 2'b00;
                ALU_OP = 3'b000; 
             end
@@ -741,7 +751,7 @@ always @(posedge clk) begin
                     COUNTER = COUNTER + 1;
                 end
 
-                 JR:begin
+                JR:begin
                     STATE = ST_jr;
                     COUNTER = COUNTER + 1;
                 end
