@@ -90,6 +90,8 @@ module control_unit(
     parameter ST_ShiftS      = 7'd46;
     parameter ST_ShiftImmediate = 7'd47;
     parameter ST_ShiftVariable  = 7'd48;
+    parameter ST_Rte         = 7'd41;
+
 
     // I instructions
 
@@ -398,6 +400,8 @@ always @(posedge clk) begin
                 COUNTER = COUNTER + 1;
                 if (COUNTER == 7'd3) begin
                     if (OPCODE == LW) begin
+                    STATE = ST_MEM_to_MDR1;
+                    end else if begin                 
                        STATE = ST_MEM_to_MDR1;
                     end else if (OPCODE == LH) begin
                         STATE = ST_MEM_to_MDR2;
