@@ -602,7 +602,7 @@ always @(posedge clk) begin
 
 
             ST_BREG_write:begin
-                if (OV) begin // o OV e a flag da CPU ai esse BREG write é pros que detectam
+                if (OV) begin 
                     STATE = ST_overflow;
                     COUNTER = COUNTER + 1;  // COUNTER = 2
                 end
@@ -678,27 +678,13 @@ always @(posedge clk) begin
                 COUNTER = 0;
             end
 
-            ST_BREG_write3:begin  // vem pra ca so que nao tem   
+            ST_BREG_write3:begin
                 STATE = ST_fetch0;
                 COUNTER = 7'b0000000;
                 REG_write = 1'b1;
                 MEM_toreg = 4'b0000;
-                reg_dst = 2'b00;  
-            end
-
-            ST_BREG_write2:begin
-                if(OV) begin
-                    STATE = ST_overflow;    // COUNTER = 2
-                    COUNTER = COUNTER + 1; 
-                end
-                else begin
-                        STATE = ST_fetch0;
-                        COUNTER = 7'b0000000;
-                        REG_write = 1'b1;
-                        MEM_toreg = 4'b0000;
-                        reg_dst = 2'b00;
-                    end
-            end
+                reg_dst = 2'b01;
+           end
 
             ST_BREG_write4:begin
                 if (LT == 1) begin
