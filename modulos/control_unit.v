@@ -81,7 +81,7 @@ module control_unit(
     parameter ST_and         = 7'd10;
     parameter ST_BREG_write  = 7'd11;
     parameter ST_BREG_write2 = 7'd12;
-    parameter ST_BREG_write3 = 7'd34;
+    parameter ST_BREG_write3 = 7'd60;
     parameter ST_BREG_write4 = 7'd52;
     parameter ST_BREG_write5 = 7'd53;
     parameter ST_SLT         = 7'd41;
@@ -92,8 +92,12 @@ module control_unit(
     parameter ST_ShiftS      = 7'd46;
     parameter ST_ShiftImmediate = 7'd47;
     parameter ST_ShiftVariable  = 7'd48;
-    parameter ST_Rte            = 7'd49;
-
+    parameter ST_Rte            = 7'd54;
+    parameter ST_break          = 7'd55;
+    parameter ST_mult           = 7'd56;
+    parameter ST_mult2          = 7'd57;
+    parameter ST_MFHI           = 7'd58;
+    parameter ST_MFLO           = 7'd59;
 
     // I instructions
 
@@ -329,7 +333,7 @@ always @(posedge clk) begin
                 A_write      = 1'b1; ///
                 B_write      = 1'b1; ///
                 MDR_write    = 1'b0;
-                ALUReg_write = 1'b0;
+                ALUReg_write = 1'b1;
                 EPC_write    = 1'b0;
                 Hi_write     = 1'b0;
                 Lo_write     = 1'b0;
@@ -419,6 +423,40 @@ always @(posedge clk) begin
                 ALU_OP = 3'b001;
                 ALUReg_write = 1;
                 COUNTER = COUNTER + 1;
+            end
+
+            ST_mult:begin
+                if (COUNTER > 7'd32) begin
+                    STATE = ST_mult2;
+                end else begin
+                    STATE = ST_mult;
+                    COUNTER = COUNTER + 1;
+                end
+                MULT_on = 1;
+            end
+
+            ST_mult2:begin
+                STATE = ST_fetch0;
+                MULT_on = 0;
+                Hi_write = 1;
+                Lo_write = 1;
+                COUNTER = 0;
+            end
+
+            ST_MFHI:begin
+                STATE = ST_fetch0;
+                MEM_toreg = 4'b0010;
+                reg_dst = 2'b00;
+                REG_write = 1;
+                COUNTER = 0;
+            end
+
+            ST_MFLO:begin
+                STATE = ST_fetch0;
+                MEM_toreg = 4'b0011;
+                reg_dst = 2'b00;
+                REG_write = 1;
+                COUNTER = 0;
             end
 
             ST_load_adress: begin  //Estado para calcular o endereço do valor a ser carregado. 
@@ -553,48 +591,68 @@ always @(posedge clk) begin
             end
 
             ST_beq: begin
-                STATE = ST_fetch0;
-                COUNTER = 7'b0000000;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b000;
+                ALU_OP = 3'b111;
+                if (COUNTER == 7'd5) begin
+                    STATE = ST_beq;
+                    COUNTER = COUNTER + 1;
+                end else begin
+                    STATE = ST_fetch0;
+                    COUNTER = 7'd0;
+                end
                 if (EQ == 1) begin
-                    ALU_OP = 3'b111;
                     PC_src = 3'b001;
                     PC_write = 1;
                 end
             end
 
             ST_bne: begin
-                STATE = ST_fetch0;
-                COUNTER = 7'b0000000;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b000;
+                ALU_OP = 3'b111;
+                if (COUNTER == 7'd5) begin
+                    STATE = ST_bne;
+                    COUNTER = COUNTER + 1;
+                end else begin
+                    STATE = ST_fetch0;
+                    COUNTER = 7'd0;
+                end
                 if (EQ == 0) begin
-                    ALU_OP = 3'b111;
                     PC_src = 3'b001;
                     PC_write = 1;
                 end
             end
 
             ST_bgt: begin
-                STATE = ST_fetch0;
-                COUNTER = 7'b0000000;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b000;
+                ALU_OP = 3'b111;
+                if (COUNTER == 7'd5) begin
+                    STATE = ST_bgt;
+                    COUNTER = COUNTER + 1;
+                end else begin
+                    STATE = ST_fetch0;
+                    COUNTER = 7'd0;
+                end
                 if (GT == 1) begin
-                    ALU_OP = 3'b111;
                     PC_src = 3'b001;
                     PC_write = 1;
                 end
             end
 
             ST_ble: begin
-                STATE = ST_fetch0;
-                COUNTER = 7'b0000000;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b000;
+                ALU_OP = 3'b111;
+                if (COUNTER == 7'd5) begin
+                    STATE = ST_ble;
+                    COUNTER = COUNTER + 1;
+                end else begin
+                    STATE = ST_fetch0;
+                    COUNTER = 7'd0;
+                end
                 if (GT == 0) begin
-                    ALU_OP = 3'b111;
                     PC_src = 3'b001;
                     PC_write = 1;
                 end
@@ -679,14 +737,16 @@ always @(posedge clk) begin
             end
 
             ST_BREG_write3:begin  // vem pra ca so que nao tem   
-                STATE = ST_fetch0;
-                COUNTER = 7'b0000000;
-                REG_write = 1'b1;
-                MEM_toreg = 4'b0000;
-                reg_dst = 2'b00;  
+                begin
+                    STATE = ST_fetch0;
+                    COUNTER = 7'b0000000;
+                    REG_write = 1'b1;
+                    MEM_toreg = 4'b0000;
+                    reg_dst = 2'b00;
+                end
             end
 
-            ST_BREG_write2:begin
+            /*ST_BREG_write2:begin
                 if(OV) begin
                     STATE = ST_overflow;    // COUNTER = 2
                     COUNTER = COUNTER + 1; 
@@ -698,7 +758,7 @@ always @(posedge clk) begin
                         MEM_toreg = 4'b0000;
                         reg_dst = 2'b00;
                     end
-            end
+            end*/
 
             ST_BREG_write4:begin
                 if (LT == 1) begin
@@ -827,6 +887,16 @@ always @(posedge clk) begin
               REG_write = 1'b1;
             end
 
+            ST_break:begin
+                STATE = ST_fetch0;
+                COUNTER = 7'b0000000;
+                ALU_srcA = 2'b00;
+                ALU_srcB = 3'b001;
+                ALU_OP = 3'b010;
+                PC_src = 3'b000;
+                PC_write = 1'b1;
+            end
+
         // INSTRUCTIONS STATES
         ST_decode2: begin
             case(OPCODE)
@@ -848,7 +918,8 @@ always @(posedge clk) begin
                         end
 
                         FUNCT_MULT:begin
-                            
+                            STATE = ST_mult;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_JR:begin
@@ -857,11 +928,13 @@ always @(posedge clk) begin
                         end
 
                         FUNCT_MFHI:begin
-                            
+                            STATE = ST_MFHI;
+                            COUNTER = 7'b0000000; 
                         end
 
                         FUNCT_MFLO:begin
-                            
+                            STATE = ST_MFLO;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_SLL:begin
@@ -904,7 +977,8 @@ always @(posedge clk) begin
                         end
 
                         FUNCT_BREAK:begin
-                            
+                            STATE = ST_break;
+                            COUNTER = 7'b0000000;
                         end
 
                         FUNCT_RTE:begin
@@ -934,17 +1008,17 @@ always @(posedge clk) begin
                 end
 
                 BNE:begin
-                    STATE = ST_beq;
+                    STATE = ST_bne;
                     COUNTER = COUNTER + 1;
                 end
 
                 BLE:begin
-                    STATE = ST_beq;
+                    STATE = ST_ble;
                     COUNTER = COUNTER + 1;
                 end
 
                 BGT:begin
-                    STATE = ST_beq;
+                    STATE = ST_bgt;
                     COUNTER = COUNTER + 1;
                 end
 
