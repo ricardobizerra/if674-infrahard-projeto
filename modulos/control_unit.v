@@ -124,6 +124,7 @@ module control_unit(
     parameter ST_addm = 7'd49;
     parameter ST_addm2 = 7'd50;
     parameter ST_addm3 = 7'd51; 
+    parameter ST_MEM_read_addm = 7'd52;
 
 // Opcodes Parameters
     // R instructions
@@ -384,16 +385,30 @@ always @(posedge clk) begin
             end
 
             ST_addm:begin
-                STATE = ST_MEM_read;
+                STATE = ST_MEM_read_addm;
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b010;
                 ALU_OP = 3'b001;
-                COUNTER = 7'd1;
+                ALUReg_write = 1;
+                COUNTER = COUNTER + 1; // COUNTER = 1
             end 
+
+            ST_MEM_read_addm:begin
+                IorD = 3'b001;
+                MEM_wr = 0;
+                COUNTER = COUNTER + 1;
+                if (COUNTER == 7'd3) begin
+                    STATE = ST_addm2;
+                end else begin
+                    STATE = ST_MEM_read_addm;
+                end
+
+            end
 
             ST_addm2:begin
                 STATE = ST_addm3;
                 MEM_toMDR = 2'b00;
+                MDR_write = 1;
                 COUNTER = COUNTER + 1;
             end
 
@@ -402,7 +417,8 @@ always @(posedge clk) begin
                 ALU_srcA = 2'b10;
                 ALU_srcB = 3'b000;
                 ALU_OP = 3'b001;
-                COUNTER = 7'd6;
+                ALUReg_write = 1;
+                COUNTER = COUNTER + 1;
             end
 
             ST_load_adress: begin  //Estado para calcular o endereço do valor a ser carregado. 
@@ -503,7 +519,6 @@ always @(posedge clk) begin
                 PC_write = 1;
                 branch = 1;
                 PC_src = 3'b010;
-                COUNTER = 7'd0;
             end
 
             ST_jal: begin //calculando endereço 
@@ -587,7 +602,7 @@ always @(posedge clk) begin
 
 
             ST_BREG_write:begin
-                if (OV) begin
+                if (OV) begin // o OV e a flag da CPU ai esse BREG write é pros que detectam
                     STATE = ST_overflow;
                     COUNTER = COUNTER + 1;  // COUNTER = 2
                 end
@@ -663,12 +678,26 @@ always @(posedge clk) begin
                 COUNTER = 0;
             end
 
-            ST_BREG_write3:begin
+            ST_BREG_write3:begin  // vem pra ca so que nao tem   
                 STATE = ST_fetch0;
                 COUNTER = 7'b0000000;
                 REG_write = 1'b1;
                 MEM_toreg = 4'b0000;
                 reg_dst = 2'b00;  
+            end
+
+            ST_BREG_write2:begin
+                if(OV) begin
+                    STATE = ST_overflow;    // COUNTER = 2
+                    COUNTER = COUNTER + 1; 
+                end
+                else begin
+                        STATE = ST_fetch0;
+                        COUNTER = 7'b0000000;
+                        REG_write = 1'b1;
+                        MEM_toreg = 4'b0000;
+                        reg_dst = 2'b00;
+                    end
             end
 
             ST_BREG_write4:begin
@@ -773,7 +802,7 @@ always @(posedge clk) begin
             end
 
             ST_addi:begin
-                STATE = ST_BREG_write2;
+                STATE = ST_BREG_write2; 
                 ALU_srcA = 2'b01;
                 ALU_srcB = 3'b010;
                 ALU_OP = 3'b001;
@@ -921,7 +950,7 @@ always @(posedge clk) begin
 
                 ADDM:begin
                     STATE = ST_addm;
-                    COUNTER = COUNTER + 1;
+                    COUNTER = 7'b0000000;
                 end
 
                 LB:begin
